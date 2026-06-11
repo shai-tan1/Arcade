@@ -9,6 +9,41 @@ import { JWT_SECRET_KEY } from '../../../shared/constants/index.js';
 // get collection 'users'
 const users = () => getDB().collection('users');
 
+// Module-level reference to the running WebSocket server.
+// Set inside initWebSocket() so controllers can push events to clients.
+let wssInstance = null;
+
+/**
+ * Send a JSON payload to every open socket that belongs to a given user.
+ * A user can have several tabs open, so all of their sockets receive it.
+ * @param {string} userId
+ * @param {object} data
+ */
+export function emitToUser(userId, data) {
+  if (!wssInstance) return;
+  const targetId = String(userId);
+  const payload = JSON.stringify(data);
+  wssInstance.clients.forEach((client) => {
+    if (
+      client.readyState === WebSocket.OPEN &&
+      String(client.userId) === targetId
+    ) {
+      client.send(payload);
+    }
+  });
+}
+
+/**
+ * Send a JSON payload to several users at once (deduplicated).
+ * @param {Array<string>} userIds
+ * @param {object} data
+ */
+export function emitToUsers(userIds = [], data) {
+  if (!wssInstance) return;
+  const unique = [...new Set(userIds.map(String))];
+  unique.forEach((id) => emitToUser(id, data));
+}
+
 // helper function for ID conversion
 const toObjectId = (id) => (id instanceof ObjectId ? id : new ObjectId(id));
 
@@ -35,6 +70,7 @@ export async function initWebSocket(server) {
 // /Resetting the status (on isOnline: false) for all users when the server starts
 
   const wss = new WebSocketServer({ server });
+  wssInstance = wss;
 
   async function verifyToken(token) {
     try {

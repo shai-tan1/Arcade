@@ -212,20 +212,44 @@
     "key_other": "y"
   },
   "UseFormattedLastSeenDate": {
-  "prefix": "Last seen",
-  "ago": "ago",
-  "yesterday": "yesterday",
-  "at": "at",
-  "seconds_one": "second",
-  "seconds_other": "seconds",
-  "minutes_one": "minute",
-  "minutes_other": "minutes",
-  "hours_one": "hour",
-  "hours_other": "hours"
-},
+    "prefix": "Last seen",
+    "ago": "ago",
+    "yesterday": "yesterday",
+    "at": "at",
+    "seconds_one": "second",
+    "seconds_other": "seconds",
+    "minutes_one": "minute",
+    "minutes_other": "minutes",
+    "hours_one": "hour",
+    "hours_other": "hours"
+  },
   "SearchPage": {
     "SearchResultsFor": "Search results for:",
     "NothingFoundFor": "Nothing found for:",
-    "EnterYourSearchTerm":"Enter your search term"
+    "EnterYourSearchTerm": "Enter your search term"
+  },
+  "MessagesPage": {
+    "Messages": "Messages",
+    "NoConversations": "No conversations yet",
+    "NoMessages": "No messages yet. Say hello!",
+    "TypeMessage": "Type a message...",
+    "LoadError": "Could not load messages",
+    "Unknown": "Unknown user"
+  },
+  "CommunitiesPage": {
+    "Communities": "Communities",
+    "Create": "Create",
+    "NamePlaceholder": "Community name",
+    "DescriptionPlaceholder": "Description (optional)",
+    "NoCommunities": "No communities yet. Create the first one!",
+    "Members": "members",
+    "Open": "Open",
+    "Join": "Join",
+    "Leave": "Leave",
+    "JoinToChat": "Join this community to read and send messages",
+    "NoMessages": "No messages yet. Start the conversation!",
+    "TypeMessage": "Type a message...",
+    "LoadError": "Could not load communities",
+    "Unknown": "Unknown user"
   }
 }

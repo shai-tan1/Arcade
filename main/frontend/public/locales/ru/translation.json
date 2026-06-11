@@ -234,6 +234,30 @@
   "SearchPage": {
     "SearchResultsFor": "Результаты поиска для:",
     "NothingFoundFor": "Ничего не найдено для:",
-    "EnterYourSearchTerm":"Введите запрос для поиска"
+    "EnterYourSearchTerm": "Введите запрос для поиска"
+  },
+  "MessagesPage": {
+    "Messages": "Сообщения",
+    "NoConversations": "Пока нет диалогов",
+    "NoMessages": "Сообщений пока нет. Поздоровайтесь!",
+    "TypeMessage": "Введите сообщение...",
+    "LoadError": "Не удалось загрузить сообщения",
+    "Unknown": "Неизвестный пользователь"
+  },
+  "CommunitiesPage": {
+    "Communities": "Сообщества",
+    "Create": "Создать",
+    "NamePlaceholder": "Название сообщества",
+    "DescriptionPlaceholder": "Описание (необязательно)",
+    "NoCommunities": "Пока нет сообществ. Создайте первое!",
+    "Members": "участников",
+    "Open": "Открыть",
+    "Join": "Вступить",
+    "Leave": "Покинуть",
+    "JoinToChat": "Вступите в сообщество, чтобы читать и отправлять сообщения",
+    "NoMessages": "Сообщений пока нет. Начните общение!",
+    "TypeMessage": "Введите сообщение...",
+    "LoadError": "Не удалось загрузить сообщества",
+    "Unknown": "Неизвестный пользователь"
   }
 }

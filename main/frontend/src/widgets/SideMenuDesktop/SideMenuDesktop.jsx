@@ -22,10 +22,7 @@ import styles from "./SideMenuDesktop.module.css";
 
 export function SideMenuDesktop() {
 
-  // authorized user
   const { authorizedUser } = useAuthData();
-  // /authorized user
-
   const darkThemeStatus = useSelector((state) => state.darkThemeStatus);
   const { t } = useTranslation();
 
@@ -44,11 +41,15 @@ export function SideMenuDesktop() {
           <p>{t("SideMenuDesktop.MyProfile")}</p>
           <Link to={"/" + authorizedUser.customId}></Link>
         </li>
+        
+        {/* --- FIXED: Messages Link --- */}
         <li className={styles.messages}>
           <MessagesIcon />
           <p>{t("SideMenuDesktop.Messages")}</p>
-          <Link to={`/${authorizedUser.customId}`}></Link>
+          <Link to="/messages"></Link> 
         </li>
+        {/* --------------------------- */}
+
         <li className={styles.friends}>
           <FriendsIcon />
           <p>{t("SideMenuDesktop.Friends")}</p>
@@ -57,7 +58,7 @@ export function SideMenuDesktop() {
         <li className={styles.groups}>
           <GroupsIcon />
           <p>{t("SideMenuDesktop.Communities")}</p>
-          <Link to={`/${authorizedUser.customId}`}></Link>
+          <Link to="/communities"></Link>
         </li>
         <li className={styles.photo}>
           <PhotosIcon />
@@ -87,26 +88,17 @@ export function SideMenuDesktop() {
         <li className={styles.crystal}>
           <CrystalIcon />
           <p>{t("SideMenuDesktop.AboutCrystal")}</p>
-          <Link
-            to={"/about-crystal"}
-            target="_blank"
-          ></Link>
+          <Link to={"/about-crystal"} target="_blank"></Link>
         </li>
         <li className={styles.agreements}>
           <DocumentationIcon />
           <p>{t("SideMenuDesktop.Agreements")}</p>
-          <Link
-            to={"/agreements"}
-            target="_blank"
-          ></Link>
+          <Link to={"/agreements"} target="_blank"></Link>
         </li>
         <li className={styles.help}>
           <HelpIcon />
           <p>{t("SideMenuDesktop.Help")}</p>
-          <Link
-            to={"/help"}
-            target="_blank"
-          ></Link>
+          <Link to={"/help"} target="_blank"></Link>
         </li>
       </ul>
     </nav>

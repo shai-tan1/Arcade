@@ -25,6 +25,8 @@ import {
   UserEditPage,
   HashtagPage,
   LikesPage,
+  MessagesPage,
+  CommunitiesPage,
   NotFoundPage,
   TermsPage,
   PrivacyPage,
@@ -95,6 +97,16 @@ export default function App() {
               <Route path="/users/:userId/edit" element={<UserEditPage />} />
               <Route path="/likes/:userId" element={<LikesPage />} />
               {/* /users */}
+
+              {/* messages */}
+              <Route path="/messages" element={<MessagesPage />} />
+              <Route path="/messages/:userId" element={<MessagesPage />} />
+              {/* /messages */}
+
+              {/* communities */}
+              <Route path="/communities" element={<CommunitiesPage />} />
+              <Route path="/communities/:communityId" element={<CommunitiesPage />} />
+              {/* /communities */}
 
               {/* posts */}
               <Route path="/posts/:postId" element={<FullPostPage />} />

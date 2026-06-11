@@ -4,6 +4,13 @@ import { USER_SCHEMA, USER_INDEXES } from '../../../modules/user/user.schema.js'
 import { POST_SCHEMA, POST_INDEXES } from '../../../modules/post/post.schema.js';
 import { HASHTAG_SCHEMA, HASHTAG_INDEXES } from '../../../modules/hashtag/hashtag.schema.js';
 import { LIKE_SCHEMA, LIKE_INDEXES } from '../../../modules/like/like.schema.js';
+import { MESSAGE_SCHEMA, MESSAGE_INDEXES } from '../../../modules/message/message.schema.js';
+import {
+    COMMUNITY_SCHEMA,
+    COMMUNITY_INDEXES,
+    COMMUNITY_MESSAGE_SCHEMA,
+    COMMUNITY_MESSAGE_INDEXES
+} from '../../../modules/community/community.schema.js';
 
 /**
  Asynchronously creates collections with $jsonSchema validation and sets all indexes.
@@ -25,6 +32,15 @@ export async function initializeCollections(db) {
 
     // 4. Initializing likes
     await upsertCollection(db, 'likes', LIKE_SCHEMA, LIKE_INDEXES);
+
+    // 5. Initializing messages (direct chat)
+    await upsertCollection(db, 'messages', MESSAGE_SCHEMA, MESSAGE_INDEXES);
+
+    // 6. Initializing communities (group chat rooms)
+    await upsertCollection(db, 'communities', COMMUNITY_SCHEMA, COMMUNITY_INDEXES);
+
+    // 7. Initializing community messages
+    await upsertCollection(db, 'communityMessages', COMMUNITY_MESSAGE_SCHEMA, COMMUNITY_MESSAGE_INDEXES);
 
     console.log(" ✅ All collections and indexes initialized.");
 }

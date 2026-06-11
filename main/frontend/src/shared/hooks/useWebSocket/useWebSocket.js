@@ -129,6 +129,16 @@ export function useWebSocket() {
           // 2. And only then do we start the background update (for reliability)
           queryClient.invalidateQueries({ queryKey: ['users'] });
         }
+
+        // New direct message -> refresh conversations and the open thread
+        if (data.type === 'message:new') {
+          queryClient.invalidateQueries({ queryKey: ['messages'] });
+        }
+
+        // New community message -> refresh the affected room
+        if (data.type === 'community:message') {
+          queryClient.invalidateQueries({ queryKey: ['communities'] });
+        }
       } catch (error) {
         console.error('[WS] Parse error:', error);
       }
