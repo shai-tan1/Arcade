@@ -11,19 +11,20 @@ import { useAuthData } from '../../features';
 import { Loader, NoAvatarIcon } from '../../shared/ui';
 import { ColorGuess } from './games/ColorGuess';
 import { MathSprint } from './games/MathSprint';
+import { Frequency } from './games/Frequency';
 
 import styles from './GamesPage.module.css';
 
 export const GAMES = [
   { key: 'colorGuess', name: 'Color Guess', emoji: '🎨', description: 'A color is shown — guess its RGB. Closest wins.', available: true },
   { key: 'math', name: 'Math Sprint', emoji: '🔢', description: 'Rapid-fire number puzzles.', available: true },
-  { key: 'frequency', name: 'Frequency', emoji: '🔊', description: 'Hear a tone, guess the Hz.', available: false },
+  { key: 'frequency', name: 'Frequency', emoji: '🔊', description: 'Hear a tone, guess the Hz.', available: true },
   { key: 'wordle', name: 'Wordle Duel', emoji: '🟩', description: 'Race to crack the word.', available: false },
   { key: 'sudoku', name: 'Sudoku', emoji: '🧩', description: 'Solve faster than your rival.', available: false },
   { key: 'zip', name: 'Zip', emoji: '➿', description: 'Connect 1→N through every cell.', available: false }
 ];
 
-const BOARDS = { colorGuess: ColorGuess, math: MathSprint };
+const BOARDS = { colorGuess: ColorGuess, math: MathSprint, frequency: Frequency };
 
 const gameName = (key) => GAMES.find((g) => g.key === key)?.name || key;
 

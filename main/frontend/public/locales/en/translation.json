@@ -318,6 +318,8 @@
     "SubmitGuess": "Submit guess",
     "ColorShown": "Shown",
     "ColorYourGuess": "Your guess",
-    "Submit": "Submit"
+    "Submit": "Submit",
+    "PlayTone": "Play tone",
+    "FreqHint": "Listen, then slide to the pitch you heard"
   }
 }

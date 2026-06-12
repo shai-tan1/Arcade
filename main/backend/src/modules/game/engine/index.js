@@ -3,10 +3,12 @@
 
 import { colorGuess } from './colorGuess.js';
 import { math } from './math.js';
+import { frequency } from './frequency.js';
 
 export const GAME_ENGINES = {
     colorGuess,
-    math
+    math,
+    frequency
 };
 
 export function getEngine(gameType) {

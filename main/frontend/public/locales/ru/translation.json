@@ -326,6 +326,8 @@
     "SubmitGuess": "Отправить",
     "ColorShown": "Показано",
     "ColorYourGuess": "Ваша догадка",
-    "Submit": "Ответить"
+    "Submit": "Ответить",
+    "PlayTone": "Сыграть тон",
+    "FreqHint": "Послушайте и подберите высоту"
   }
 }
