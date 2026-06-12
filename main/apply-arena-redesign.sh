@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+# Redesigns the Games page into a Matiks-style "arena": duel-tile grid + rank card.
+# Same buttons/features/handlers — only layout & styling change.
+# Best applied AFTER apply-theme-arena.sh. Run from the repo "main/" directory.
+set -e
+if [ ! -d frontend/src ]; then echo "ERROR: run from your repo's main/ directory"; exit 1; fi
+if [ ! -f frontend/src/pages/GamesPage/GamesPage.jsx ]; then echo "ERROR: games feature missing (run apply-games.sh first)"; exit 1; fi
+
+cat > frontend/src/pages/GamesPage/GamesPage.jsx << 'JSXEOF'
 // frontend/src/pages/GamesPage/GamesPage.jsx
 
 import { useEffect, useState } from 'react';
@@ -331,3 +340,288 @@ export function GamesPage() {
   if (gameType) return <GameLobby gameType={gameType} />;
   return <GamePicker />;
 }
+JSXEOF
+echo "  + GamesPage.jsx"
+
+cat > frontend/src/pages/GamesPage/GamesPage.module.css << 'CSSEOF'
+.arena {
+  margin-bottom: var(--content_margin_bottom_global);
+  padding: 4px 14px 0;
+}
+
+/* ---------- hero (picker) ---------- */
+.hero {
+  padding: 14px 4px 18px;
+}
+.hero_title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color_global);
+}
+.hero_sub {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--separator_color_global);
+}
+
+/* ---------- duel grid ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 150px;
+  padding: 16px;
+  border-radius: 16px;
+  background-color: var(--filling_background-color_global);
+  border: var(--border_global);
+  text-decoration: none;
+  color: var(--color_global);
+  transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+a.tile:hover {
+  transform: translateY(-2px);
+  background-color: var(--item_hover_global);
+  border-color: color-mix(in srgb, var(--hashtag_color_global) 55%, transparent);
+}
+
+.tile_icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  background-color: color-mix(in srgb, var(--tint) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tint) 38%, transparent);
+}
+
+.tile_name { font-size: 16px; font-weight: 700; color: var(--color_global); }
+.tile_desc {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--separator_color_global);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tile_play {
+  margin-top: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hashtag_color_global);
+}
+.tile_badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--separator_color_global);
+  border: var(--border_global);
+  border-radius: 6px;
+  padding: 3px 7px;
+}
+.tile_soon { opacity: 0.5; }
+
+/* ---------- lobby header ---------- */
+.lobby_head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0 18px;
+}
+.lobby_title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color_global);
+}
+.back {
+  position: absolute;
+  left: 2px;
+  font-size: 22px;
+  text-decoration: none;
+  color: var(--color_global);
+}
+.forfeit {
+  position: absolute;
+  right: 2px;
+  background: transparent;
+  border: var(--border_global);
+  color: var(--separator_color_global);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* ---------- rank card ---------- */
+.rank_card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  background-color: var(--filling_background-color_global);
+  border: var(--border_global);
+}
+.rank_icon {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  background-color: color-mix(in srgb, var(--tint) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tint) 38%, transparent);
+}
+.rank_body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rank_label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--separator_color_global);
+}
+.rank_value { font-size: 30px; font-weight: 800; color: var(--color_global); line-height: 1.1; }
+.rank_bar {
+  height: 8px;
+  border-radius: 999px;
+  background-color: var(--item_hover_global);
+  overflow: hidden;
+  margin: 9px 0 7px;
+}
+.rank_bar_fill { display: block; height: 100%; border-radius: 999px; background-color: var(--hashtag_color_global); }
+.rank_record { font-size: 12px; color: var(--separator_color_global); }
+
+/* ---------- buttons ---------- */
+.btn_primary_lg {
+  width: 100%;
+  margin-top: 14px;
+  padding: 15px;
+  border: none;
+  border-radius: 14px;
+  background-color: var(--hashtag_color_global);
+  color: var(--on_accent_global);
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition_background-color_hover_global);
+}
+.btn_primary_lg:hover { background-color: var(--hashtag_color_hover_global); }
+.btn_primary_lg:disabled { opacity: 0.6; cursor: default; }
+
+.btn_primary, .btn_secondary, .btn_muted {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn_primary { background-color: var(--hashtag_color_global); color: var(--on_accent_global); }
+.btn_secondary { background-color: var(--item_hover_global); color: var(--color_global); }
+.btn_muted { background-color: transparent; border: var(--border_global); color: var(--separator_color_global); }
+.btn_primary:disabled, .btn_secondary:disabled, .btn_muted:disabled { opacity: 0.55; cursor: default; }
+
+.searching {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  background-color: var(--filling_background-color_global);
+  border: var(--border_global);
+  color: var(--separator_color_global);
+}
+
+/* ---------- section cards ---------- */
+.card {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background-color: var(--filling_background-color_global);
+  border: var(--border_global);
+}
+.card_title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--separator_color_global);
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: var(--border_global);
+}
+.row:last-child { border-bottom: none; }
+.row_user { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--color_global); min-width: 0; }
+.row_name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row_actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.empty { color: var(--separator_color_global); padding: 6px 0; }
+
+/* ---------- avatars ---------- */
+.avatar { border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; }
+.avatar_empty { display: flex; align-items: center; justify-content: center; background-color: var(--item_hover_global); }
+.avatar_empty svg { width: 60%; height: 60%; fill: var(--fill_no_avatar_global); }
+
+/* ---------- leaderboard ---------- */
+.leaderboard { list-style: none; }
+.lb_row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: var(--border_global); }
+.lb_row:last-child { border-bottom: none; }
+.lb_rank { width: 24px; text-align: center; font-weight: 800; color: var(--separator_color_global); }
+.lb_rank_1 { color: #f2c33d; }
+.lb_rank_2 { color: #c7ccd1; }
+.lb_rank_3 { color: #d08a52; }
+.lb_rating { margin-left: auto; font-weight: 800; color: var(--color_global); }
+
+/* ---------- match result / shared ---------- */
+.center_loader { height: 280px; display: flex; align-items: center; justify-content: center; }
+.loader { height: 21px; width: 21px; }
+
+.waiting { text-align: center; color: var(--separator_color_global); padding: 24px 0; }
+.result { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px 16px; text-align: center; }
+.result_badge { font-size: 26px; font-weight: 800; padding: 6px 22px; border-radius: 12px; }
+.result_win { color: var(--on_accent_global); background-color: var(--hashtag_color_global); }
+.result_loss { color: #fff; background-color: #e24b4a; }
+.result_draw { color: var(--color_global); background-color: var(--item_hover_global); }
+.scoreline { display: flex; gap: 24px; font-size: 17px; }
+.elo_delta { color: var(--separator_color_global); }
+.result_actions { display: flex; gap: 10px; margin-top: 6px; }
+CSSEOF
+echo "  + GamesPage.module.css"
+
+node <<'NODE'
+const fs=require('fs');
+const add={ en:{Arena:"Arena",ArenaSubtitle:"Duel a friend or get matched. Win to climb your rating.",Play:"Play",RankRating:"Rank rating",WinShort:"W",LossShort:"L"},
+            ru:{Arena:"Арена",ArenaSubtitle:"Вызовите друга или найдите соперника — побеждайте и растите в рейтинге.",Play:"Играть",RankRating:"Рейтинг",WinShort:"W",LossShort:"L"} };
+for(const lang of ['en','ru']){ const p='frontend/public/locales/'+lang+'/translation.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); j.GamesPage={...(j.GamesPage||{}),...add[lang]}; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n'); console.log('  + locale '+lang); }
+console.log('\nDone. Arena redesign applied.');
+NODE

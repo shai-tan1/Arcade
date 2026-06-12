@@ -320,6 +320,12 @@
     "ColorYourGuess": "Your guess",
     "Submit": "Submit",
     "PlayTone": "Play tone",
-    "FreqHint": "Listen, then slide to the pitch you heard"
+    "FreqHint": "Listen, then slide to the pitch you heard",
+    "Arena": "Arena",
+    "ArenaSubtitle": "Duel a friend or get matched. Win to climb your rating.",
+    "Play": "Play",
+    "RankRating": "Rank rating",
+    "WinShort": "W",
+    "LossShort": "L"
   }
 }
