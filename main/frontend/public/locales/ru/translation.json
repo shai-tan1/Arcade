@@ -334,6 +334,15 @@
     "Play": "Играть",
     "RankRating": "Рейтинг",
     "WinShort": "W",
-    "LossShort": "L"
+    "LossShort": "L",
+    "Duels": "Дуэли",
+    "PlayNow": "Играть сейчас",
+    "GamesPlayed": "Сыграно игр",
+    "TopRating": "Лучший рейтинг",
+    "WinsStat": "Победы",
+    "Ranked": "Рейтинговый",
+    "Friendly": "Дружеский",
+    "FindMatchSub": "Подбор соперника по уровню.",
+    "ChallengeFriendSub": "Выберите друга и игру."
   }
 }

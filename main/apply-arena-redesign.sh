@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Redesigns the Games page into a Matiks-style "arena": duel-tile grid + rank card.
-# Same buttons/features/handlers — only layout & styling change.
+# Matiks-style Games arena: stat chips + square duel tiles (corner rating badges) + feature cards,
+# plus the per-game rank-card lobby. Only the Games page changes; all handlers/queries unchanged.
 # Best applied AFTER apply-theme-arena.sh. Run from the repo "main/" directory.
 set -e
 if [ ! -d frontend/src ]; then echo "ERROR: run from your repo's main/ directory"; exit 1; fi
@@ -25,12 +25,12 @@ import { Frequency } from './games/Frequency';
 import styles from './GamesPage.module.css';
 
 export const GAMES = [
-  { key: 'colorGuess', name: 'Color Guess', emoji: '🎨', description: 'A color is shown — guess its RGB. Closest wins.', available: true, tint: '#e0567f' },
-  { key: 'math', name: 'Math Sprint', emoji: '🔢', description: 'Rapid-fire number puzzles.', available: true, tint: '#3b82f6' },
-  { key: 'frequency', name: 'Frequency', emoji: '🔊', description: 'Hear a tone, guess the Hz.', available: true, tint: '#2dd4bf' },
-  { key: 'wordle', name: 'Wordle Duel', emoji: '🟩', description: 'Race to crack the word.', available: false, tint: '#84cc16' },
-  { key: 'sudoku', name: 'Sudoku', emoji: '🧩', description: 'Solve faster than your rival.', available: false, tint: '#a78bfa' },
-  { key: 'zip', name: 'Zip', emoji: '➿', description: 'Connect 1→N through every cell.', available: false, tint: '#f59e0b' }
+  { key: 'colorGuess', name: 'Color Guess', emoji: '🎨', description: 'A color is shown — guess its RGB. Closest wins.', sub: 'Guess the RGB', available: true, tint: '#e0567f' },
+  { key: 'math', name: 'Math Sprint', emoji: '🔢', description: 'Rapid-fire number puzzles.', sub: 'Rapid-fire math', available: true, tint: '#3b82f6' },
+  { key: 'frequency', name: 'Frequency', emoji: '🔊', description: 'Hear a tone, guess the Hz.', sub: 'Hear the pitch', available: true, tint: '#2dd4bf' },
+  { key: 'wordle', name: 'Wordle Duel', emoji: '🟩', description: 'Race to crack the word.', sub: 'Crack the word', available: false, tint: '#84cc16' },
+  { key: 'sudoku', name: 'Sudoku', emoji: '🧩', description: 'Solve faster than your rival.', sub: 'Solve faster', available: false, tint: '#a78bfa' },
+  { key: 'zip', name: 'Zip', emoji: '➿', description: 'Connect 1→N through every cell.', sub: 'Connect the path', available: false, tint: '#f59e0b' }
 ];
 
 const BOARDS = { colorGuess: ColorGuess, math: MathSprint, frequency: Frequency };
@@ -49,6 +49,18 @@ function Avatar({ user, size = 38 }) {
 /* ----------------------------- Picker ----------------------------- */
 function GamePicker() {
   const { t } = useTranslation();
+  const ratingsQuery = useQuery({
+    queryKey: ['games', 'ratings'],
+    queryFn: () => httpClient.get('/games/ratings'),
+    retry: false
+  });
+  const ratings = ratingsQuery.data || [];
+  const ratingFor = (key) => ratings.find((r) => r.gameType === key);
+  const totalPlayed = ratings.reduce((s, r) => s + (r.played || 0), 0);
+  const totalWins = ratings.reduce((s, r) => s + (r.won || 0), 0);
+  const topRating = ratings.length ? Math.max(...ratings.map((r) => r.rating || 0)) : 0;
+  const firstAvailable = GAMES.find((g) => g.available)?.key || 'colorGuess';
+
   return (
     <div className={styles.arena}>
       <header className={styles.hero}>
@@ -56,24 +68,48 @@ function GamePicker() {
         <p className={styles.hero_sub}>{t('GamesPage.ArenaSubtitle')}</p>
       </header>
 
-      <div className={styles.grid}>
+      <div className={styles.stats}>
+        <div className={styles.stat}><span className={styles.stat_v}>{totalPlayed}</span><span className={styles.stat_l}>{t('GamesPage.GamesPlayed')}</span></div>
+        <div className={styles.stat}><span className={styles.stat_v}>{totalWins}</span><span className={styles.stat_l}>{t('GamesPage.WinsStat')}</span></div>
+        <div className={styles.stat}><span className={styles.stat_v}>{topRating || '—'}</span><span className={styles.stat_l}>{t('GamesPage.TopRating')}</span></div>
+      </div>
+
+      <div className={styles.sechead}><h2>{t('GamesPage.Duels')}</h2></div>
+      <div className={styles.duels}>
         {GAMES.map((game) => {
+          const r = ratingFor(game.key);
           const inner = (
             <>
-              <span className={styles.tile_icon} style={{ '--tint': game.tint }}>{game.emoji}</span>
-              <span className={styles.tile_name}>{game.name}</span>
-              <span className={styles.tile_desc}>{game.description}</span>
               {game.available
-                ? <span className={styles.tile_play}>{t('GamesPage.Play')} →</span>
-                : <span className={styles.tile_badge}>{t('GamesPage.Soon')}</span>}
+                ? (r ? <span className={styles.badge}>{r.rating}</span> : <span className={styles.badge_play}>▶</span>)
+                : <span className={styles.soon}>{t('GamesPage.Soon')}</span>}
+              <span className={styles.chip} style={{ '--tint': game.tint }}>{game.emoji}</span>
+              <span className={styles.nm}>{game.name}</span>
+              <span className={styles.sub}>{game.sub}</span>
             </>
           );
           return game.available ? (
-            <Link key={game.key} to={`/games/${game.key}`} className={styles.tile}>{inner}</Link>
+            <Link key={game.key} to={`/games/${game.key}`} className={styles.duel}>{inner}</Link>
           ) : (
-            <div key={game.key} className={`${styles.tile} ${styles.tile_soon}`}>{inner}</div>
+            <div key={game.key} className={`${styles.duel} ${styles.locked}`}>{inner}</div>
           );
         })}
+      </div>
+
+      <div className={styles.sechead}><h2>{t('GamesPage.PlayNow')}</h2></div>
+      <div className={styles.features}>
+        <Link to={`/games/${firstAvailable}`} className={styles.feat}>
+          <span className={styles.feat_glow} />
+          <span className={styles.feat_tag}>{t('GamesPage.Ranked')}</span>
+          <h3 className={styles.feat_h}>{t('GamesPage.FindMatch')}</h3>
+          <p className={styles.feat_p}>{t('GamesPage.FindMatchSub')}</p>
+        </Link>
+        <Link to={`/games/${firstAvailable}`} className={styles.feat}>
+          <span className={styles.feat_glow} />
+          <span className={styles.feat_tag}>{t('GamesPage.Friendly')}</span>
+          <h3 className={styles.feat_h}>{t('GamesPage.ChallengeFriend')}</h3>
+          <p className={styles.feat_p}>{t('GamesPage.ChallengeFriendSub')}</p>
+        </Link>
       </div>
     </div>
   );
@@ -366,75 +402,76 @@ cat > frontend/src/pages/GamesPage/GamesPage.module.css << 'CSSEOF'
   color: var(--separator_color_global);
 }
 
-/* ---------- duel grid ---------- */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 14px;
-}
+/* ---------- stat chips ---------- */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+.stat { background-color: var(--filling_background-color_global); border: var(--border_global); border-radius: 14px; padding: 14px 16px; }
+.stat_v { display: block; font-size: 22px; font-weight: 800; color: var(--color_global); }
+.stat_l { display: block; font-size: 12px; color: var(--separator_color_global); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
-.tile {
+/* ---------- section heading ---------- */
+.sechead { margin: 24px 0 14px; }
+.sechead h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--separator_color_global); }
+
+/* ---------- duel tiles ---------- */
+.duels { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 14px; }
+.duel {
   position: relative;
+  aspect-ratio: 1 / 1.06;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-height: 150px;
   padding: 16px;
-  border-radius: 16px;
+  border-radius: 18px;
   background-color: var(--filling_background-color_global);
   border: var(--border_global);
   text-decoration: none;
   color: var(--color_global);
   transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
 }
-a.tile:hover {
-  transform: translateY(-2px);
+a.duel:hover {
+  transform: translateY(-3px);
   background-color: var(--item_hover_global);
-  border-color: color-mix(in srgb, var(--hashtag_color_global) 55%, transparent);
+  border-color: color-mix(in srgb, var(--hashtag_color_global) 50%, transparent);
 }
-
-.tile_icon {
+.chip {
   width: 48px;
   height: 48px;
-  border-radius: 13px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 25px;
   background-color: color-mix(in srgb, var(--tint) 20%, transparent);
   border: 1px solid color-mix(in srgb, var(--tint) 38%, transparent);
 }
+.nm { margin-top: auto; font-size: 15px; font-weight: 700; color: var(--color_global); }
+.sub { font-size: 12px; color: var(--separator_color_global); margin-top: 2px; }
+.badge { position: absolute; top: 12px; right: 12px; background-color: var(--hashtag_color_global); color: var(--on_accent_global); font-weight: 800; font-size: 12px; padding: 3px 9px; border-radius: 8px; }
+.badge_play { position: absolute; top: 12px; right: 14px; color: var(--hashtag_color_global); font-size: 13px; }
+.soon { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--separator_color_global); border: var(--border_global); border-radius: 7px; padding: 3px 7px; }
+.locked { opacity: 0.5; }
 
-.tile_name { font-size: 16px; font-weight: 700; color: var(--color_global); }
-.tile_desc {
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--separator_color_global);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+/* ---------- feature cards ---------- */
+.features { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.feat {
+  position: relative;
   overflow: hidden;
-}
-.tile_play {
-  margin-top: auto;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--hashtag_color_global);
-}
-.tile_badge {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--separator_color_global);
+  min-height: 128px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-color: var(--filling_background-color_global);
   border: var(--border_global);
-  border-radius: 6px;
-  padding: 3px 7px;
+  border-radius: 18px;
+  text-decoration: none;
+  color: var(--color_global);
+  transition: border-color 140ms ease;
 }
-.tile_soon { opacity: 0.5; }
+.feat:hover { border-color: color-mix(in srgb, var(--hashtag_color_global) 50%, transparent); }
+.feat_glow { position: absolute; right: -30px; top: -30px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--hashtag_color_global) 16%, transparent), transparent 70%); }
+.feat_tag { position: absolute; top: 18px; left: 22px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hashtag_color_global); }
+.feat_h { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.05; color: var(--color_global); }
+.feat_p { font-size: 13px; color: var(--separator_color_global); margin-top: 6px; }
 
 /* ---------- lobby header ---------- */
 .lobby_head {
@@ -620,8 +657,10 @@ echo "  + GamesPage.module.css"
 
 node <<'NODE'
 const fs=require('fs');
-const add={ en:{Arena:"Arena",ArenaSubtitle:"Duel a friend or get matched. Win to climb your rating.",Play:"Play",RankRating:"Rank rating",WinShort:"W",LossShort:"L"},
-            ru:{Arena:"Арена",ArenaSubtitle:"Вызовите друга или найдите соперника — побеждайте и растите в рейтинге.",Play:"Играть",RankRating:"Рейтинг",WinShort:"W",LossShort:"L"} };
-for(const lang of ['en','ru']){ const p='frontend/public/locales/'+lang+'/translation.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); j.GamesPage={...(j.GamesPage||{}),...add[lang]}; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n'); console.log('  + locale '+lang); }
+const add={
+  en:{Arena:"Arena",ArenaSubtitle:"Duel a friend or get matched. Win to climb your rating.",Play:"Play",RankRating:"Rank rating",WinShort:"W",LossShort:"L",Duels:"Duels",PlayNow:"Play now",GamesPlayed:"Games played",TopRating:"Top rating",WinsStat:"Wins",Ranked:"Ranked",Friendly:"Friendly",FindMatchSub:"Get paired at your level.",ChallengeFriendSub:"Pick a friend, pick a game."},
+  ru:{Arena:"Арена",ArenaSubtitle:"Вызовите друга или найдите соперника — побеждайте и растите в рейтинге.",Play:"Играть",RankRating:"Рейтинг",WinShort:"W",LossShort:"L",Duels:"Дуэли",PlayNow:"Играть сейчас",GamesPlayed:"Сыграно игр",TopRating:"Лучший рейтинг",WinsStat:"Победы",Ranked:"Рейтинговый",Friendly:"Дружеский",FindMatchSub:"Подбор соперника по уровню.",ChallengeFriendSub:"Выберите друга и игру."}
+};
+for(const lang of ['en','ru']){const p='frontend/public/locales/'+lang+'/translation.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.GamesPage={...(j.GamesPage||{}),...add[lang]};fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');console.log('  + locale '+lang);}
 console.log('\nDone. Arena redesign applied.');
 NODE

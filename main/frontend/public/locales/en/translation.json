@@ -326,6 +326,15 @@
     "Play": "Play",
     "RankRating": "Rank rating",
     "WinShort": "W",
-    "LossShort": "L"
+    "LossShort": "L",
+    "Duels": "Duels",
+    "PlayNow": "Play now",
+    "GamesPlayed": "Games played",
+    "TopRating": "Top rating",
+    "WinsStat": "Wins",
+    "Ranked": "Ranked",
+    "Friendly": "Friendly",
+    "FindMatchSub": "Get paired at your level.",
+    "ChallengeFriendSub": "Pick a friend, pick a game."
   }
 }

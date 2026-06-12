@@ -16,12 +16,12 @@ import { Frequency } from './games/Frequency';
 import styles from './GamesPage.module.css';
 
 export const GAMES = [
-  { key: 'colorGuess', name: 'Color Guess', emoji: '🎨', description: 'A color is shown — guess its RGB. Closest wins.', available: true, tint: '#e0567f' },
-  { key: 'math', name: 'Math Sprint', emoji: '🔢', description: 'Rapid-fire number puzzles.', available: true, tint: '#3b82f6' },
-  { key: 'frequency', name: 'Frequency', emoji: '🔊', description: 'Hear a tone, guess the Hz.', available: true, tint: '#2dd4bf' },
-  { key: 'wordle', name: 'Wordle Duel', emoji: '🟩', description: 'Race to crack the word.', available: false, tint: '#84cc16' },
-  { key: 'sudoku', name: 'Sudoku', emoji: '🧩', description: 'Solve faster than your rival.', available: false, tint: '#a78bfa' },
-  { key: 'zip', name: 'Zip', emoji: '➿', description: 'Connect 1→N through every cell.', available: false, tint: '#f59e0b' }
+  { key: 'colorGuess', name: 'Color Guess', emoji: '🎨', description: 'A color is shown — guess its RGB. Closest wins.', sub: 'Guess the RGB', available: true, tint: '#e0567f' },
+  { key: 'math', name: 'Math Sprint', emoji: '🔢', description: 'Rapid-fire number puzzles.', sub: 'Rapid-fire math', available: true, tint: '#3b82f6' },
+  { key: 'frequency', name: 'Frequency', emoji: '🔊', description: 'Hear a tone, guess the Hz.', sub: 'Hear the pitch', available: true, tint: '#2dd4bf' },
+  { key: 'wordle', name: 'Wordle Duel', emoji: '🟩', description: 'Race to crack the word.', sub: 'Crack the word', available: false, tint: '#84cc16' },
+  { key: 'sudoku', name: 'Sudoku', emoji: '🧩', description: 'Solve faster than your rival.', sub: 'Solve faster', available: false, tint: '#a78bfa' },
+  { key: 'zip', name: 'Zip', emoji: '➿', description: 'Connect 1→N through every cell.', sub: 'Connect the path', available: false, tint: '#f59e0b' }
 ];
 
 const BOARDS = { colorGuess: ColorGuess, math: MathSprint, frequency: Frequency };
@@ -40,6 +40,18 @@ function Avatar({ user, size = 38 }) {
 /* ----------------------------- Picker ----------------------------- */
 function GamePicker() {
   const { t } = useTranslation();
+  const ratingsQuery = useQuery({
+    queryKey: ['games', 'ratings'],
+    queryFn: () => httpClient.get('/games/ratings'),
+    retry: false
+  });
+  const ratings = ratingsQuery.data || [];
+  const ratingFor = (key) => ratings.find((r) => r.gameType === key);
+  const totalPlayed = ratings.reduce((s, r) => s + (r.played || 0), 0);
+  const totalWins = ratings.reduce((s, r) => s + (r.won || 0), 0);
+  const topRating = ratings.length ? Math.max(...ratings.map((r) => r.rating || 0)) : 0;
+  const firstAvailable = GAMES.find((g) => g.available)?.key || 'colorGuess';
+
   return (
     <div className={styles.arena}>
       <header className={styles.hero}>
@@ -47,24 +59,48 @@ function GamePicker() {
         <p className={styles.hero_sub}>{t('GamesPage.ArenaSubtitle')}</p>
       </header>
 
-      <div className={styles.grid}>
+      <div className={styles.stats}>
+        <div className={styles.stat}><span className={styles.stat_v}>{totalPlayed}</span><span className={styles.stat_l}>{t('GamesPage.GamesPlayed')}</span></div>
+        <div className={styles.stat}><span className={styles.stat_v}>{totalWins}</span><span className={styles.stat_l}>{t('GamesPage.WinsStat')}</span></div>
+        <div className={styles.stat}><span className={styles.stat_v}>{topRating || '—'}</span><span className={styles.stat_l}>{t('GamesPage.TopRating')}</span></div>
+      </div>
+
+      <div className={styles.sechead}><h2>{t('GamesPage.Duels')}</h2></div>
+      <div className={styles.duels}>
         {GAMES.map((game) => {
+          const r = ratingFor(game.key);
           const inner = (
             <>
-              <span className={styles.tile_icon} style={{ '--tint': game.tint }}>{game.emoji}</span>
-              <span className={styles.tile_name}>{game.name}</span>
-              <span className={styles.tile_desc}>{game.description}</span>
               {game.available
-                ? <span className={styles.tile_play}>{t('GamesPage.Play')} →</span>
-                : <span className={styles.tile_badge}>{t('GamesPage.Soon')}</span>}
+                ? (r ? <span className={styles.badge}>{r.rating}</span> : <span className={styles.badge_play}>▶</span>)
+                : <span className={styles.soon}>{t('GamesPage.Soon')}</span>}
+              <span className={styles.chip} style={{ '--tint': game.tint }}>{game.emoji}</span>
+              <span className={styles.nm}>{game.name}</span>
+              <span className={styles.sub}>{game.sub}</span>
             </>
           );
           return game.available ? (
-            <Link key={game.key} to={`/games/${game.key}`} className={styles.tile}>{inner}</Link>
+            <Link key={game.key} to={`/games/${game.key}`} className={styles.duel}>{inner}</Link>
           ) : (
-            <div key={game.key} className={`${styles.tile} ${styles.tile_soon}`}>{inner}</div>
+            <div key={game.key} className={`${styles.duel} ${styles.locked}`}>{inner}</div>
           );
         })}
+      </div>
+
+      <div className={styles.sechead}><h2>{t('GamesPage.PlayNow')}</h2></div>
+      <div className={styles.features}>
+        <Link to={`/games/${firstAvailable}`} className={styles.feat}>
+          <span className={styles.feat_glow} />
+          <span className={styles.feat_tag}>{t('GamesPage.Ranked')}</span>
+          <h3 className={styles.feat_h}>{t('GamesPage.FindMatch')}</h3>
+          <p className={styles.feat_p}>{t('GamesPage.FindMatchSub')}</p>
+        </Link>
+        <Link to={`/games/${firstAvailable}`} className={styles.feat}>
+          <span className={styles.feat_glow} />
+          <span className={styles.feat_tag}>{t('GamesPage.Friendly')}</span>
+          <h3 className={styles.feat_h}>{t('GamesPage.ChallengeFriend')}</h3>
+          <p className={styles.feat_p}>{t('GamesPage.ChallengeFriendSub')}</p>
+        </Link>
       </div>
     </div>
   );
