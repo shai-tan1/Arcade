@@ -20,7 +20,7 @@ function formatTime(value) {
 
 function Avatar({ user }) {
   if (user?.avatarUri) {
-    return <img className={styles.avatar} src={API_BASE_URL + user.avatarUri} alt={user.name} />;
+    return <img className={styles.avatar} src={(/^https?:\/\//.test(user.avatarUri) ? user.avatarUri : API_BASE_URL + user.avatarUri)} alt={user.name} />;
   }
   return (
     <span className={`${styles.avatar} ${styles.avatar_empty}`}>

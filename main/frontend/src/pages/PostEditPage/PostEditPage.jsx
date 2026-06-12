@@ -296,10 +296,10 @@ export function PostEditPage() {
     setText(post.data?.text);
     setTextValueDatabase(post.data?.text);
     setDatabaseMainImageUri(
-      post.data?.mainImageUri && API_BASE_URL + post.data.mainImageUri,
+      post.data?.mainImageUri && (/^https?:\/\//.test(post.data.mainImageUri) ? post.data.mainImageUri : API_BASE_URL + post.data.mainImageUri),
     );
     setMainImageUrl(
-      post.data?.mainImageUri && API_BASE_URL + post.data.mainImageUri,
+      post.data?.mainImageUri && (/^https?:\/\//.test(post.data.mainImageUri) ? post.data.mainImageUri : API_BASE_URL + post.data.mainImageUri),
     );
     setDatabaseMainImageUriUpdate(post.data?.mainImageUri);
   }, [post.data]);

@@ -280,9 +280,9 @@ export function UserInformation() {
 
   useEffect(() => {
     if (user.isSuccess) {
-      setDatabaseAvatarUri(user.data?.avatarUri ? API_BASE_URL + user.data.avatarUri : undefined);
+      setDatabaseAvatarUri(user.data?.avatarUri ? (/^https?:\/\//.test(user.data.avatarUri) ? user.data.avatarUri : API_BASE_URL + user.data.avatarUri) : undefined);
       setDatabaseHaveAvatar(!!user.data?.avatarUri);
-      setDatabaseBannerUri(user.data?.bannerUri ? API_BASE_URL + user.data.bannerUri : undefined);
+      setDatabaseBannerUri(user.data?.bannerUri ? (/^https?:\/\//.test(user.data.bannerUri) ? user.data.bannerUri : API_BASE_URL + user.data.bannerUri) : undefined);
       setDatabaseHaveBanner(!!user.data?.bannerUri);
       setUserName(user.data?.name);
       setUserCustomId(user.data?.customId);

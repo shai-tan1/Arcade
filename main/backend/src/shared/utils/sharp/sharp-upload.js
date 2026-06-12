@@ -4,6 +4,7 @@ import path from "path";
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
 import Busboy from "busboy";
+import { cloudinaryEnabled, uploadBuffer } from "../cloudinary/index.js";
 
 // check if a file is a valid GIF
 function isValidGif(buffer) {
@@ -325,17 +326,34 @@ export async function processImage(req, res, next) {
         ---------------------------
         */
 
-        const filename = `${id}-${randomUUID()}.${processedFile.extension}`;
-        const finalPath = path.join(directory, filename);
-        fs.mkdirSync(directory, { recursive: true });
-        fs.writeFileSync(finalPath, processedFile.buffer);
+        const baseName = `${id}-${randomUUID()}`;
+        const filename = `${baseName}.${processedFile.extension}`;
 
-        req.processedFile = {
-          filename,
-          path: finalPath,
-          mimetype: processedFile.mimetype,
-          extension: processedFile.extension,
-        };
+        if (cloudinaryEnabled()) {
+          // Persistent storage (Render's disk is ephemeral).
+          const result = await uploadBuffer(processedFile.buffer, {
+            folder: directory,
+            publicId: baseName,
+          });
+          req.processedFile = {
+            filename,
+            url: result.secure_url,
+            publicId: result.public_id,
+            mimetype: processedFile.mimetype,
+            extension: processedFile.extension,
+          };
+        } else {
+          // Local dev fallback: write to disk.
+          const finalPath = path.join(directory, filename);
+          fs.mkdirSync(directory, { recursive: true });
+          fs.writeFileSync(finalPath, processedFile.buffer);
+          req.processedFile = {
+            filename,
+            path: finalPath,
+            mimetype: processedFile.mimetype,
+            extension: processedFile.extension,
+          };
+        }
 
         processingComplete = true;
         processSemaphore.release();

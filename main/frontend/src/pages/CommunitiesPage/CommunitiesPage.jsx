@@ -19,7 +19,7 @@ function formatTime(value) {
 
 function Avatar({ user }) {
   if (user?.avatarUri) {
-    return <img className={styles.avatar} src={API_BASE_URL + user.avatarUri} alt={user.name} />;
+    return <img className={styles.avatar} src={(/^https?:\/\//.test(user.avatarUri) ? user.avatarUri : API_BASE_URL + user.avatarUri)} alt={user.name} />;
   }
   return (
     <span className={`${styles.avatar} ${styles.avatar_empty}`}>
@@ -309,7 +309,7 @@ function CommunityRoom({ communityId }) {
                   <Link to={`/${user.customId}`} className={styles.request_user}>
                     <span className={`${styles.avatar} ${styles.avatar_empty} ${styles.avatar_sm}`}>
                       {user.avatarUri
-                        ? <img className={styles.avatar_img} src={API_BASE_URL + user.avatarUri} alt={user.name} />
+                        ? <img className={styles.avatar_img} src={(/^https?:\/\//.test(user.avatarUri) ? user.avatarUri : API_BASE_URL + user.avatarUri)} alt={user.name} />
                         : <NoAvatarIcon />}
                     </span>
                     <span className={styles.request_name}>{user.name} <span className={styles.request_id}>@{user.customId}</span></span>

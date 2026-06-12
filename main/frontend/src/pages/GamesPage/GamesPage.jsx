@@ -30,7 +30,7 @@ const gameName = (key) => GAMES.find((g) => g.key === key)?.name || key;
 function Avatar({ user, size = 38 }) {
   const style = { width: size, height: size };
   if (user?.avatarUri) {
-    return <img className={styles.avatar} style={style} src={API_BASE_URL + user.avatarUri} alt={user.name} />;
+    return <img className={styles.avatar} style={style} src={(/^https?:\/\//.test(user.avatarUri) ? user.avatarUri : API_BASE_URL + user.avatarUri)} alt={user.name} />;
   }
   return <span className={`${styles.avatar} ${styles.avatar_empty}`} style={style}><NoAvatarIcon /></span>;
 }

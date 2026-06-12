@@ -17,7 +17,7 @@ router.post('/:postId/image', auth, canUpdatePost, sharp.processImage, sharp.err
       return res.status(400).json({ error: 'No processed file available.' });
     }
     res.json({
-      imageUri: `/uploads/posts/images/${req.processedFile.filename}`,
+      imageUri: req.processedFile.url || `/uploads/posts/images/${req.processedFile.filename}`,
       postId: req.params.postId,
     });
   } catch (err) {

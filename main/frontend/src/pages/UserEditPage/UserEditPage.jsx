@@ -583,7 +583,7 @@ export function UserEditPage() {
                       <GifInCircleIcon />
                     </div>
                   ) : (
-                    <img src={API_BASE_URL + user.data?.avatarUri} alt="user avatar" />
+                    <img src={(/^https?:\/\//.test(user.data?.avatarUri) ? user.data?.avatarUri : API_BASE_URL + user.data?.avatarUri)} alt="user avatar" />
                   )}
                   {(userOnline) && (
                     <div className={styles.user_online_status_circle_icon_avatar}>

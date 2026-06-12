@@ -110,8 +110,8 @@ export function FullPostPage() {
 
   const { userOnline } = useUserStatus(post?.data?.user?.customId, { delay: 100 });
 
-  const userAvatar = API_BASE_URL + post?.data?.user?.avatarUri;
-  const mainImage = API_BASE_URL + post?.data?.mainImageUri;
+  const userAvatar = (/^https?:\/\//.test(post?.data?.user?.avatarUri) ? post?.data?.user?.avatarUri : API_BASE_URL + post?.data?.user?.avatarUri);
+  const mainImage = (/^https?:\/\//.test(post?.data?.mainImageUri) ? post?.data?.mainImageUri : API_BASE_URL + post?.data?.mainImageUri);
 
   // Initializing states for likes
   const [userLiked, setUserLiked] = useState(false);

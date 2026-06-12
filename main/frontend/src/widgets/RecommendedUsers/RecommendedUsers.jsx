@@ -99,7 +99,7 @@ export function RecommendedUsers() {
                             <GifInCircleIcon />
                           </div>
                         ) : (
-                          <img src={API_BASE_URL + user.avatarUri} alt="user avatar" loading="lazy" />
+                          <img src={(/^https?:\/\//.test(user.avatarUri) ? user.avatarUri : API_BASE_URL + user.avatarUri)} alt="user avatar" loading="lazy" />
                         )}
                         {user.status?.isOnline ? (
                           <div className={styles.user_online_status_circle_icon}>

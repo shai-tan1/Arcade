@@ -241,7 +241,7 @@ export function OptionsMenuUser() {
                 <GifInCircleIcon />
               </div>
             ) : (
-              <img src={API_BASE_URL + authorizedUser?.avatarUri} alt="user avatar" />
+              <img src={(/^https?:\/\//.test(authorizedUser?.avatarUri) ? authorizedUser?.avatarUri : API_BASE_URL + authorizedUser?.avatarUri)} alt="user avatar" />
             )}
             {(userOnline) && (
               <div className={styles.user_online_status_circle_icon_avatar}>

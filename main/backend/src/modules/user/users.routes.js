@@ -41,7 +41,7 @@ router.post("/:userId/image",
       }
 
       res.json({
-        imageUri: `/uploads/users/images/${req.processedFile.filename}`,
+        imageUri: req.processedFile.url || `/uploads/users/images/${req.processedFile.filename}`,
         userId: req.params.userId,
       });
     } catch (err) {
