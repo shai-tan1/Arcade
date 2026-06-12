@@ -33,13 +33,13 @@ export async function connectDB(retries = maxRetries) {
         return;
     }
 
-    const clientUri = PRODUCTION_STATUS
-        ? `mongodb://${USER}:${PASSWORD}@${HOST}:${PORT}/?authSource=${AUTH_SOURCE}`
-        : BASE_URI;
+    const clientUri = BASE_URI
+        ? BASE_URI
+        : `mongodb://${USER}:${PASSWORD}@${HOST}:${PORT}/?authSource=${AUTH_SOURCE}`;
 
-    const mongoLogUri = PRODUCTION_STATUS
-        ? `${HOST}:${PORT}/${DB_NAME}`
-        : `${BASE_URI}/${DB_NAME}`;
+    const mongoLogUri = BASE_URI
+        ? DB_NAME
+        : `${HOST}:${PORT}/${DB_NAME}`;
 
     console.log(` 🔌 Connecting to MongoDB at: ${mongoLogUri}...`);
 
