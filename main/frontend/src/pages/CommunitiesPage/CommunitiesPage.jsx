@@ -36,6 +36,7 @@ function CommunityList() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const { data, isPending, isError } = useQuery({
     queryKey: ['communities', 'list'],
@@ -48,6 +49,7 @@ function CommunityList() {
     onSuccess: (created) => {
       setName('');
       setDescription('');
+      setIsPrivate(false);
       queryClient.invalidateQueries({ queryKey: ['communities', 'list'] });
       if (created?._id) navigate(`/communities/${created._id}`);
     }
@@ -61,7 +63,7 @@ function CommunityList() {
   const handleCreate = () => {
     const trimmed = name.trim();
     if (!trimmed || createMutation.isPending) return;
-    createMutation.mutate({ name: trimmed, description: description.trim() });
+    createMutation.mutate({ name: trimmed, description: description.trim(), isPrivate });
   };
 
   return (
@@ -81,6 +83,14 @@ function CommunityList() {
           placeholder={t('CommunitiesPage.DescriptionPlaceholder')}
           maxLength={500}
         />
+        <label className={styles.private_toggle}>
+          <input
+            type="checkbox"
+            checked={isPrivate}
+            onChange={(event) => setIsPrivate(event.target.checked)}
+          />
+          <span>{t('CommunitiesPage.PrivateLabel')}</span>
+        </label>
         <button
           className={styles.create_button}
           onClick={handleCreate}
@@ -117,13 +127,17 @@ function CommunityList() {
               <Link className={styles.open_button} to={`/communities/${community._id}`}>
                 {t('CommunitiesPage.Open')}
               </Link>
+            ) : community.hasRequested ? (
+              <button className={styles.requested_button} disabled>
+                {t('CommunitiesPage.Requested')}
+              </button>
             ) : (
               <button
                 className={styles.join_button}
                 onClick={() => joinMutation.mutate(community._id)}
                 disabled={joinMutation.isPending}
               >
-                {t('CommunitiesPage.Join')}
+                {community.isPrivate ? t('CommunitiesPage.RequestToJoin') : t('CommunitiesPage.Join')}
               </button>
             )}
           </li>
@@ -180,6 +194,28 @@ function CommunityRoom({ communityId }) {
       setText('');
       queryClient.invalidateQueries({ queryKey: ['communities', communityId, 'messages'] });
     }
+  });
+
+  const isCreator = communityQuery.data?.isCreator;
+
+  const requestsQuery = useQuery({
+    queryKey: ['communities', communityId, 'requests'],
+    queryFn: () => httpClient.get(`/communities/${communityId}/requests`),
+    enabled: !!isCreator,
+    retry: false
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (userId) => httpClient.post(`/communities/${communityId}/requests/${userId}/approve`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['communities', communityId] });
+      queryClient.invalidateQueries({ queryKey: ['communities', communityId, 'requests'] });
+    }
+  });
+
+  const declineMutation = useMutation({
+    mutationFn: (userId) => httpClient.post(`/communities/${communityId}/requests/${userId}/decline`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['communities', communityId, 'requests'] })
   });
 
   useEffect(() => {
@@ -241,17 +277,55 @@ function CommunityRoom({ communityId }) {
 
       {!isMember ? (
         <div className={styles.join_prompt}>
-          <p>{t('CommunitiesPage.JoinToChat')}</p>
-          <button
-            className={styles.join_button}
-            onClick={() => joinMutation.mutate()}
-            disabled={joinMutation.isPending}
-          >
-            {t('CommunitiesPage.Join')}
-          </button>
+          {community.hasRequested ? (
+            <>
+              <p>{t('CommunitiesPage.RequestPending')}</p>
+              <button className={styles.requested_button} disabled>
+                {t('CommunitiesPage.Requested')}
+              </button>
+            </>
+          ) : (
+            <>
+              <p>{community.isPrivate ? t('CommunitiesPage.RequestToChat') : t('CommunitiesPage.JoinToChat')}</p>
+              <button
+                className={styles.join_button}
+                onClick={() => joinMutation.mutate()}
+                disabled={joinMutation.isPending}
+              >
+                {community.isPrivate ? t('CommunitiesPage.RequestToJoin') : t('CommunitiesPage.Join')}
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <>
+          {isCreator && requestsQuery.data?.length > 0 && (
+            <div className={styles.requests_panel}>
+              <span className={styles.requests_title}>
+                {t('CommunitiesPage.JoinRequests')} ({requestsQuery.data.length})
+              </span>
+              {requestsQuery.data.map((user) => (
+                <div key={user._id} className={styles.request_row}>
+                  <Link to={`/${user.customId}`} className={styles.request_user}>
+                    <span className={`${styles.avatar} ${styles.avatar_empty} ${styles.avatar_sm}`}>
+                      {user.avatarUri
+                        ? <img className={styles.avatar_img} src={API_BASE_URL + user.avatarUri} alt={user.name} />
+                        : <NoAvatarIcon />}
+                    </span>
+                    <span className={styles.request_name}>{user.name} <span className={styles.request_id}>@{user.customId}</span></span>
+                  </Link>
+                  <div className={styles.request_actions}>
+                    <button className={styles.join_button} onClick={() => approveMutation.mutate(user._id)}>
+                      {t('CommunitiesPage.Approve')}
+                    </button>
+                    <button className={styles.leave_button} onClick={() => declineMutation.mutate(user._id)}>
+                      {t('CommunitiesPage.Decline')}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className={styles.messages_scroll}>
             {messagesQuery.isPending && (
               <div className={styles.center_loader}><div className={styles.loader}><Loader /></div></div>

@@ -22,11 +22,7 @@ const MAX_TEXT_LENGTH = 5000;
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 500;
 
-/* -----------------------------------------------------------
-   GET /communities
-   List every community with member count and whether the
-   current user is already a member.
------------------------------------------------------------ */
+/* GET /communities — list with member count, membership and request flags */
 export const getCommunities = async (req, res) => {
     try {
         const myId = new ObjectId(req.userId._id);
@@ -40,8 +36,10 @@ export const getCommunities = async (req, res) => {
                     avatarUri: 1,
                     creatorId: 1,
                     createdAt: 1,
+                    isPrivate: { $ifNull: ['$isPrivate', false] },
                     membersCount: { $size: '$members' },
-                    isMember: { $in: [myId, '$members'] }
+                    isMember: { $in: [myId, '$members'] },
+                    hasRequested: { $in: [myId, { $ifNull: ['$joinRequests', []] }] }
                 }
             }
         ]).toArray();
@@ -52,11 +50,7 @@ export const getCommunities = async (req, res) => {
     }
 };
 
-/* -----------------------------------------------------------
-   POST /communities
-   Body: { name, description? }
-   Creator automatically becomes the first member.
------------------------------------------------------------ */
+/* POST /communities — body { name, description?, isPrivate? } */
 export const createCommunity = async (req, res) => {
     try {
         const myId = new ObjectId(req.userId._id);
@@ -65,6 +59,7 @@ export const createCommunity = async (req, res) => {
         const description = typeof req.body.description === 'string'
             ? req.body.description.trim()
             : '';
+        const isPrivate = req.body.isPrivate === true || req.body.isPrivate === 'true';
 
         if (!name) {
             return res.status(400).json({ message: 'Community name is required' });
@@ -80,8 +75,10 @@ export const createCommunity = async (req, res) => {
             name,
             description,
             avatarUri: null,
+            isPrivate,
             creatorId: myId,
             members: [myId],
+            joinRequests: [],
             createdAt: new Date()
         };
 
@@ -92,10 +89,7 @@ export const createCommunity = async (req, res) => {
     }
 };
 
-/* -----------------------------------------------------------
-   GET /communities/:communityId
-   Single community with populated member list.
------------------------------------------------------------ */
+/* GET /communities/:communityId — single community with members + flags */
 export const getCommunity = async (req, res) => {
     try {
         const { communityId } = req.params;
@@ -117,11 +111,13 @@ export const getCommunity = async (req, res) => {
             },
             {
                 $addFields: {
-                    isMember: {
-                        $in: [myId, { $map: { input: '$members', as: 'm', in: '$$m._id' } }]
-                    }
+                    isPrivate: { $ifNull: ['$isPrivate', false] },
+                    isCreator: { $eq: ['$creatorId', myId] },
+                    isMember: { $in: [myId, { $map: { input: '$members', as: 'm', in: '$$m._id' } }] },
+                    hasRequested: { $in: [myId, { $ifNull: ['$joinRequests', []] }] }
                 }
-            }
+            },
+            { $project: { joinRequests: 0 } }
         ]).toArray();
 
         if (!found.length) {
@@ -134,9 +130,11 @@ export const getCommunity = async (req, res) => {
     }
 };
 
-/* -----------------------------------------------------------
+/*
    POST /communities/:communityId/join
------------------------------------------------------------ */
+   Public community  -> join immediately.
+   Private community -> register a join request (awaiting approval).
+*/
 export const joinCommunity = async (req, res) => {
     try {
         const { communityId } = req.params;
@@ -144,25 +142,40 @@ export const joinCommunity = async (req, res) => {
             return res.status(400).json({ message: 'Invalid community id' });
         }
         const myId = new ObjectId(req.userId._id);
+        const communityObjectId = new ObjectId(communityId);
 
-        const result = await communities().updateOne(
-            { _id: new ObjectId(communityId) },
-            { $addToSet: { members: myId } }
+        const community = await communities().findOne(
+            { _id: communityObjectId },
+            { projection: { members: 1, isPrivate: 1, creatorId: 1 } }
         );
-
-        if (result.matchedCount === 0) {
+        if (!community) {
             return res.status(404).json({ message: 'Community not found' });
         }
 
-        res.status(200).json({ message: 'Joined' });
+        if (community.members.some((m) => m.equals(myId))) {
+            return res.status(200).json({ status: 'member' });
+        }
+
+        if (community.isPrivate) {
+            await communities().updateOne(
+                { _id: communityObjectId },
+                { $addToSet: { joinRequests: myId } }
+            );
+            emitToUsers([community.creatorId.toString()], { type: 'community:request' });
+            return res.status(200).json({ status: 'requested' });
+        }
+
+        await communities().updateOne(
+            { _id: communityObjectId },
+            { $addToSet: { members: myId } }
+        );
+        res.status(200).json({ status: 'member' });
     } catch (error) {
         handleServerError(res, error);
     }
 };
 
-/* -----------------------------------------------------------
-   POST /communities/:communityId/leave
------------------------------------------------------------ */
+/* POST /communities/:communityId/leave — also clears any pending request */
 export const leaveCommunity = async (req, res) => {
     try {
         const { communityId } = req.params;
@@ -173,7 +186,7 @@ export const leaveCommunity = async (req, res) => {
 
         const result = await communities().updateOne(
             { _id: new ObjectId(communityId) },
-            { $pull: { members: myId } }
+            { $pull: { members: myId, joinRequests: myId } }
         );
 
         if (result.matchedCount === 0) {
@@ -186,10 +199,118 @@ export const leaveCommunity = async (req, res) => {
     }
 };
 
-/* -----------------------------------------------------------
-   GET /communities/:communityId/messages
-   Only members may read the room chat.
------------------------------------------------------------ */
+/* GET /communities/:communityId/requests — creator only; pending join requests */
+export const getJoinRequests = async (req, res) => {
+    try {
+        const { communityId } = req.params;
+        if (!ObjectId.isValid(communityId)) {
+            return res.status(400).json({ message: 'Invalid community id' });
+        }
+        const myId = new ObjectId(req.userId._id);
+        const communityObjectId = new ObjectId(communityId);
+
+        const community = await communities().findOne(
+            { _id: communityObjectId },
+            { projection: { creatorId: 1 } }
+        );
+        if (!community) {
+            return res.status(404).json({ message: 'Community not found' });
+        }
+        if (!community.creatorId.equals(myId)) {
+            return res.status(403).json({ message: 'Only the creator can view requests' });
+        }
+
+        const result = await communities().aggregate([
+            { $match: { _id: communityObjectId } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'joinRequests',
+                    foreignField: '_id',
+                    as: 'requests',
+                    pipeline: [{ $project: USER_PUBLIC_PROJECTION }]
+                }
+            },
+            { $project: { _id: 0, requests: 1 } }
+        ]).toArray();
+
+        res.status(200).json(result[0]?.requests || []);
+    } catch (error) {
+        handleServerError(res, error);
+    }
+};
+
+/* POST /communities/:communityId/requests/:userId/approve — creator only */
+export const approveJoinRequest = async (req, res) => {
+    try {
+        const { communityId, userId } = req.params;
+        if (!ObjectId.isValid(communityId) || !ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid id' });
+        }
+        const myId = new ObjectId(req.userId._id);
+        const communityObjectId = new ObjectId(communityId);
+        const targetId = new ObjectId(userId);
+
+        const community = await communities().findOne(
+            { _id: communityObjectId },
+            { projection: { creatorId: 1 } }
+        );
+        if (!community) {
+            return res.status(404).json({ message: 'Community not found' });
+        }
+        if (!community.creatorId.equals(myId)) {
+            return res.status(403).json({ message: 'Only the creator can approve requests' });
+        }
+
+        await communities().updateOne(
+            { _id: communityObjectId },
+            { $pull: { joinRequests: targetId }, $addToSet: { members: targetId } }
+        );
+
+        emitToUsers([userId], { type: 'community:request' });
+
+        res.status(200).json({ message: 'Approved' });
+    } catch (error) {
+        handleServerError(res, error);
+    }
+};
+
+/* POST /communities/:communityId/requests/:userId/decline — creator only */
+export const declineJoinRequest = async (req, res) => {
+    try {
+        const { communityId, userId } = req.params;
+        if (!ObjectId.isValid(communityId) || !ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid id' });
+        }
+        const myId = new ObjectId(req.userId._id);
+        const communityObjectId = new ObjectId(communityId);
+        const targetId = new ObjectId(userId);
+
+        const community = await communities().findOne(
+            { _id: communityObjectId },
+            { projection: { creatorId: 1 } }
+        );
+        if (!community) {
+            return res.status(404).json({ message: 'Community not found' });
+        }
+        if (!community.creatorId.equals(myId)) {
+            return res.status(403).json({ message: 'Only the creator can decline requests' });
+        }
+
+        await communities().updateOne(
+            { _id: communityObjectId },
+            { $pull: { joinRequests: targetId } }
+        );
+
+        emitToUsers([userId], { type: 'community:request' });
+
+        res.status(200).json({ message: 'Declined' });
+    } catch (error) {
+        handleServerError(res, error);
+    }
+};
+
+/* GET /communities/:communityId/messages — members only */
 export const getCommunityMessages = async (req, res) => {
     try {
         const { communityId } = req.params;
@@ -233,10 +354,7 @@ export const getCommunityMessages = async (req, res) => {
     }
 };
 
-/* -----------------------------------------------------------
-   POST /communities/:communityId/messages
-   Body: { text }. Only members may post. Notifies all members.
------------------------------------------------------------ */
+/* POST /communities/:communityId/messages — members only; body { text } */
 export const sendCommunityMessage = async (req, res) => {
     try {
         const { communityId } = req.params;
@@ -277,7 +395,6 @@ export const sendCommunityMessage = async (req, res) => {
         const result = await communityMessages().insertOne(doc);
         const created = { _id: result.insertedId, ...doc };
 
-        // Realtime: notify every member to refresh this room's chat.
         emitToUsers(
             community.members.map((m) => m.toString()),
             { type: 'community:message', communityId }

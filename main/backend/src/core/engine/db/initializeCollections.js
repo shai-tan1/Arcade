@@ -11,6 +11,15 @@ import {
     COMMUNITY_MESSAGE_SCHEMA,
     COMMUNITY_MESSAGE_INDEXES
 } from '../../../modules/community/community.schema.js';
+import { FRIENDSHIP_SCHEMA, FRIENDSHIP_INDEXES } from '../../../modules/friend/friend.schema.js';
+import {
+    GAME_MATCH_SCHEMA,
+    GAME_MATCH_INDEXES,
+    GAME_RATING_SCHEMA,
+    GAME_RATING_INDEXES,
+    GAME_QUEUE_SCHEMA,
+    GAME_QUEUE_INDEXES
+} from '../../../modules/game/game.schema.js';
 
 /**
  Asynchronously creates collections with $jsonSchema validation and sets all indexes.
@@ -41,6 +50,14 @@ export async function initializeCollections(db) {
 
     // 7. Initializing community messages
     await upsertCollection(db, 'communityMessages', COMMUNITY_MESSAGE_SCHEMA, COMMUNITY_MESSAGE_INDEXES);
+
+    // 8. Initializing friendships
+    await upsertCollection(db, 'friendships', FRIENDSHIP_SCHEMA, FRIENDSHIP_INDEXES);
+
+    // 9. Initializing game matches / ratings / queue
+    await upsertCollection(db, 'gameMatches', GAME_MATCH_SCHEMA, GAME_MATCH_INDEXES);
+    await upsertCollection(db, 'gameRatings', GAME_RATING_SCHEMA, GAME_RATING_INDEXES);
+    await upsertCollection(db, 'gameQueue', GAME_QUEUE_SCHEMA, GAME_QUEUE_INDEXES);
 
     console.log(" ✅ All collections and indexes initialized.");
 }

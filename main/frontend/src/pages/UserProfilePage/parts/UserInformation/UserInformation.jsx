@@ -47,6 +47,8 @@ import { NotFoundPage } from '../../../../pages';
 import { convertImage } from '../../../../shared/utils';
 import { formatLinksInText } from '../../../../shared/helpers';
 
+import { ProfileActions } from './ProfileActions';
+
 import styles from './UserInformation.module.css';
 
 export function UserInformation() {
@@ -732,6 +734,9 @@ export function UserInformation() {
               </div>
             </div>
           </div>
+          {logInStatus && authorizedUser?.customId !== userId && user.data?._id && (
+            <ProfileActions profileCustomId={userId} profileUserId={user.data._id} />
+          )}
           {userBio && (
             <div className={styles.about_wrap}>
               <div className={userName ? styles.about : styles.about_without_name}>

@@ -8,6 +8,9 @@ import {
     getCommunity,
     joinCommunity,
     leaveCommunity,
+    getJoinRequests,
+    approveJoinRequest,
+    declineJoinRequest,
     getCommunityMessages,
     sendCommunityMessage
 } from './community.controller.js';
@@ -24,6 +27,11 @@ router.get('/:communityId', auth, getCommunity);
 // membership
 router.post('/:communityId/join', auth, joinCommunity);
 router.post('/:communityId/leave', auth, leaveCommunity);
+
+// join requests (private communities)
+router.get('/:communityId/requests', auth, getJoinRequests);
+router.post('/:communityId/requests/:userId/approve', auth, approveJoinRequest);
+router.post('/:communityId/requests/:userId/decline', auth, declineJoinRequest);
 
 // room chat
 router.get('/:communityId/messages', auth, getCommunityMessages);

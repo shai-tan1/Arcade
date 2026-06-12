@@ -9,6 +9,8 @@ export { HashtagPage } from "./HashtagPage";
 export { LikesPage } from "./LikesPage";
 export { MessagesPage } from "./MessagesPage";
 export { CommunitiesPage } from "./CommunitiesPage";
+export { FriendsPage } from "./FriendsPage";
+export { GamesPage } from "./GamesPage";
 export { NotFoundPage } from "./NotFoundPage";
 export { TermsPage } from "./TermsPage";
 export { PrivacyPage } from "./PrivacyPage";

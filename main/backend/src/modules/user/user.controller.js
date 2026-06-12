@@ -46,9 +46,16 @@ export const getUser = async (req, res) => {
 // get users
 export const getUsers = async (req, res) => {
   try {
-    const { exclude, limit } = req.query;
+    const { exclude, limit, q } = req.query;
     const query = exclude ? { customId: { $ne: exclude } } : {};
     const max = parseInt(limit) || 4;
+
+    // Optional search by name or @customId (case-insensitive).
+    if (q && q.trim()) {
+      const safe = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp(safe, 'i');
+      query.$or = [{ name: rx }, { customId: rx }];
+    }
 
     const foundUsers = await users().find(query, { projection: USER_PROJECTION })
       .limit(max)

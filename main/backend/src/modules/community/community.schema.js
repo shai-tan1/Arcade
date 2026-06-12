@@ -19,6 +19,10 @@ export const COMMUNITY_SCHEMA = {
             bsonType: ['string', 'null'],
             description: 'optional avatar uri'
         },
+        isPrivate: {
+            bsonType: 'bool',
+            description: 'optional; private communities require approval to join'
+        },
         creatorId: {
             bsonType: 'objectId',
             description: 'must be an objectId and is required'
@@ -27,6 +31,11 @@ export const COMMUNITY_SCHEMA = {
             bsonType: 'array',
             items: { bsonType: 'objectId' },
             description: 'array of member objectIds and is required'
+        },
+        joinRequests: {
+            bsonType: 'array',
+            items: { bsonType: 'objectId' },
+            description: 'optional; users awaiting approval to join a private community'
         },
         createdAt: {
             bsonType: 'date',

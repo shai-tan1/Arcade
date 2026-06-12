@@ -27,6 +27,8 @@ import {
   LikesPage,
   MessagesPage,
   CommunitiesPage,
+  FriendsPage,
+  GamesPage,
   NotFoundPage,
   TermsPage,
   PrivacyPage,
@@ -107,6 +109,16 @@ export default function App() {
               <Route path="/communities" element={<CommunitiesPage />} />
               <Route path="/communities/:communityId" element={<CommunitiesPage />} />
               {/* /communities */}
+
+              {/* friends */}
+              <Route path="/friends" element={<FriendsPage />} />
+              {/* /friends */}
+
+              {/* games */}
+              <Route path="/games" element={<GamesPage />} />
+              <Route path="/games/match/:matchId" element={<GamesPage />} />
+              <Route path="/games/:gameType" element={<GamesPage />} />
+              {/* /games */}
 
               {/* posts */}
               <Route path="/posts/:postId" element={<FullPostPage />} />

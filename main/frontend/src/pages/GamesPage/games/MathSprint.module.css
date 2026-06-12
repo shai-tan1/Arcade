@@ -1,0 +1,82 @@
+.board {
+  background-color: var(--filling_background-color_global);
+  padding: 18px 16px 28px;
+}
+
+.scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.score_block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 90px;
+}
+
+.score_name {
+  font-size: 13px;
+  color: var(--separator_color_global);
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score_value { font-size: 24px; font-weight: 800; color: var(--color_global); }
+.score_progress { font-size: 12px; color: var(--separator_color_global); }
+
+.round_indicator { font-weight: 700; color: var(--color_global); }
+
+.timer {
+  text-align: center;
+  font-size: 14px;
+  color: var(--separator_color_global);
+  margin-bottom: 14px;
+}
+
+.question {
+  text-align: center;
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--color_global);
+  margin-bottom: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.input {
+  display: block;
+  margin: 0 auto;
+  width: 200px;
+  padding: 12px 16px;
+  font-size: 24px;
+  text-align: center;
+  border-radius: 12px;
+  border: var(--border_global);
+  background-color: var(--background-color_global);
+  color: var(--color_global);
+  outline: none;
+}
+
+.input:focus { border-color: var(--hashtag_color_global); }
+
+.submit {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--hashtag_color_global);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.submit:disabled { opacity: 0.6; cursor: default; }
+
+.waiting { text-align: center; color: var(--separator_color_global); padding: 30px 0; }

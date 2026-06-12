@@ -139,6 +139,26 @@ export function useWebSocket() {
         if (data.type === 'community:message') {
           queryClient.invalidateQueries({ queryKey: ['communities'] });
         }
+
+        // Friend request / accept / change -> refresh friends + requests
+        if (data.type === 'friend:update') {
+          queryClient.invalidateQueries({ queryKey: ['friends'] });
+        }
+
+        // Community join request created / approved / declined
+        if (data.type === 'community:request') {
+          queryClient.invalidateQueries({ queryKey: ['communities'] });
+        }
+
+        // Games: matched / challenge / opponent progress / match over
+        if (
+          data.type === 'game:matched' ||
+          data.type === 'game:challenge' ||
+          data.type === 'game:update' ||
+          data.type === 'game:over'
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['games'] });
+        }
       } catch (error) {
         console.error('[WS] Parse error:', error);
       }

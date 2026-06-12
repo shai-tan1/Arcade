@@ -169,3 +169,10 @@
 
 /* /theme colors */
 /* /variables */
+/* games nav item (added) */
+.games svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--stroke_global);
+  fill: none;
+}
