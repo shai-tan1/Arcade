@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🕹️ Arcade (CRYSTAL)
+# 🕹️ Arcade
 
 [![Deploy with Vercel](https://vercelbadge.vercel.app/api/shai-tan1/Arcade)](https://arcade-seven-navy.vercel.app/)
 [![GitHub Repo Size](https://img.shields.io/github/repo-size/shai-tan1/Arcade?style=for-the-badge&color=000000)](https://github.com/shai-tan1/Arcade)
