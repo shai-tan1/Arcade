@@ -74,7 +74,7 @@ Ensure you have the following installed on your local machine:
 
 1. **Clone the repository**
 ```bash
-   git clone [https://github.com/shai-tan1/Arcade.git](https://github.com/shai-tan1/Arcade.git)cd Arcade
+   git clone [https://github.com/shai-tan1/Arcade.git](https://github.com/shai-tan1/Arcade.git)
 ```
 2. **Navigate into the project directory**
 ```
