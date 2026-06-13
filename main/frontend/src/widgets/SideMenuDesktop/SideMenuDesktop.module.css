@@ -176,3 +176,12 @@
   stroke: var(--stroke_global);
   fill: none;
 }
+
+
+/* forums nav item (added) */
+.forums svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--stroke_global);
+  fill: none;
+}

@@ -71,6 +71,15 @@ export function SideMenuDesktop() {
           <p>{t("SideMenuDesktop.Games")}</p>
           <Link to="/games"></Link>
         </li>
+        <li className={styles.forums}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 5.5h16a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H9l-4 3.5V16.5H4A1.5 1.5 0 0 1 2.5 15V7A1.5 1.5 0 0 1 4 5.5Z" />
+            <line x1="6.5" y1="9.5" x2="17.5" y2="9.5" />
+            <line x1="6.5" y1="12.5" x2="13.5" y2="12.5" />
+          </svg>
+          <p>{t("SideMenuDesktop.Forums")}</p>
+          <Link to="/forums"></Link>
+        </li>
         <li className={styles.photo}>
           <PhotosIcon />
           <p>{t("SideMenuDesktop.Photo")}</p>

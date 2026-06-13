@@ -111,7 +111,8 @@
     "AboutCrystal": "О Crystal",
     "Agreements": "Соглашения",
     "Help": "Помощь",
-    "Games": "Игры"
+    "Games": "Игры",
+    "Forums": "Форумы"
   },
   "SideMenuMobile": {
     "MyProfile": "Мой профиль",
@@ -344,5 +345,35 @@
     "Friendly": "Дружеский",
     "FindMatchSub": "Подбор соперника по уровню.",
     "ChallengeFriendSub": "Выберите друга и игру."
+  },
+  "ForumsPage": {
+    "Title": "Форумы",
+    "Subtitle": "Создайте тему и обсудите её с сообществом.",
+    "NewTopic": "Новая тема",
+    "EditTopic": "Редактировать тему",
+    "NoTopics": "Пока нет тем — создайте первую.",
+    "CommentsShort": "комм.",
+    "Comments": "Комментарии",
+    "Comment": "Комментировать",
+    "Reply": "Ответить",
+    "Edit": "Изменить",
+    "Delete": "Удалить",
+    "Save": "Сохранить",
+    "Publish": "Опубликовать",
+    "Cancel": "Отмена",
+    "Edited": "изменено",
+    "DeletedComment": "[удалено]",
+    "WriteComment": "Напишите комментарий…",
+    "WriteReply": "Напишите ответ…",
+    "TitleField": "Заголовок",
+    "BodyField": "Текст",
+    "TagsField": "Теги",
+    "TitlePlaceholder": "Чёткий и понятный заголовок",
+    "BodyPlaceholder": "Поделитесь мыслями, вопросом или темой для обсуждения…",
+    "TagsPlaceholder": "Через запятую, напр. общее, помощь, идеи",
+    "ConfirmDeleteTopic": "Удалить эту тему и все комментарии?",
+    "ConfirmDeleteComment": "Удалить этот комментарий?",
+    "TopicError": "Не удалось загрузить тему.",
+    "SaveError": "Что-то пошло не так. Попробуйте ещё раз."
   }
 }

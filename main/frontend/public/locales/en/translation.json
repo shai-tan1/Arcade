@@ -111,7 +111,8 @@
     "AboutCrystal": "About Crystal",
     "Agreements": "Agreements",
     "Help": "Help",
-    "Games": "Games"
+    "Games": "Games",
+    "Forums": "Forums"
   },
   "SideMenuMobile": {
     "MyProfile": "My profile",
@@ -336,5 +337,35 @@
     "Friendly": "Friendly",
     "FindMatchSub": "Get paired at your level.",
     "ChallengeFriendSub": "Pick a friend, pick a game."
+  },
+  "ForumsPage": {
+    "Title": "Forums",
+    "Subtitle": "Start a topic and discuss with the community.",
+    "NewTopic": "New topic",
+    "EditTopic": "Edit topic",
+    "NoTopics": "No topics yet — be the first to start one.",
+    "CommentsShort": "comments",
+    "Comments": "Comments",
+    "Comment": "Comment",
+    "Reply": "Reply",
+    "Edit": "Edit",
+    "Delete": "Delete",
+    "Save": "Save",
+    "Publish": "Publish",
+    "Cancel": "Cancel",
+    "Edited": "edited",
+    "DeletedComment": "[deleted]",
+    "WriteComment": "Write a comment…",
+    "WriteReply": "Write a reply…",
+    "TitleField": "Title",
+    "BodyField": "Body",
+    "TagsField": "Tags",
+    "TitlePlaceholder": "A clear, specific title",
+    "BodyPlaceholder": "Share your thoughts, a question, or a discussion starter…",
+    "TagsPlaceholder": "Comma-separated, e.g. general, help, ideas",
+    "ConfirmDeleteTopic": "Delete this topic and all its comments?",
+    "ConfirmDeleteComment": "Delete this comment?",
+    "TopicError": "This topic could not be loaded.",
+    "SaveError": "Something went wrong. Please try again."
   }
 }

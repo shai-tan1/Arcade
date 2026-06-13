@@ -20,6 +20,12 @@ import {
     GAME_QUEUE_SCHEMA,
     GAME_QUEUE_INDEXES
 } from '../../../modules/game/game.schema.js';
+import {
+    FORUM_TOPIC_SCHEMA,
+    FORUM_TOPIC_INDEXES,
+    FORUM_COMMENT_SCHEMA,
+    FORUM_COMMENT_INDEXES
+} from '../../../modules/forum/forum.schema.js';
 
 /**
  Asynchronously creates collections with $jsonSchema validation and sets all indexes.
@@ -58,6 +64,9 @@ export async function initializeCollections(db) {
     await upsertCollection(db, 'gameMatches', GAME_MATCH_SCHEMA, GAME_MATCH_INDEXES);
     await upsertCollection(db, 'gameRatings', GAME_RATING_SCHEMA, GAME_RATING_INDEXES);
     await upsertCollection(db, 'gameQueue', GAME_QUEUE_SCHEMA, GAME_QUEUE_INDEXES);
+
+    await upsertCollection(db, 'forumTopics', FORUM_TOPIC_SCHEMA, FORUM_TOPIC_INDEXES);
+    await upsertCollection(db, 'forumComments', FORUM_COMMENT_SCHEMA, FORUM_COMMENT_INDEXES);
 
     console.log(" ✅ All collections and indexes initialized.");
 }

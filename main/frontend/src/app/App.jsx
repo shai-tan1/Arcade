@@ -29,6 +29,7 @@ import {
   CommunitiesPage,
   FriendsPage,
   GamesPage,
+  ForumsPage,
   NotFoundPage,
   TermsPage,
   PrivacyPage,
@@ -118,6 +119,10 @@ export default function App() {
               <Route path="/games" element={<GamesPage />} />
               <Route path="/games/match/:matchId" element={<GamesPage />} />
               <Route path="/games/:gameType" element={<GamesPage />} />
+              <Route path="/forums" element={<ForumsPage />} />
+              <Route path="/forums/new" element={<ForumsPage />} />
+              <Route path="/forums/:topicId" element={<ForumsPage />} />
+              <Route path="/forums/:topicId/edit" element={<ForumsPage />} />
               {/* /games */}
 
               {/* posts */}
