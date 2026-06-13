@@ -1,0 +1,3 @@
+export {
+    useFormattedRegistrationDate
+} from "./useFormattedRegistrationDate"

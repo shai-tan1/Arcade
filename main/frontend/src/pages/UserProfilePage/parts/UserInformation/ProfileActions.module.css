@@ -1,0 +1,41 @@
+.actions {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0 2px;
+  flex-wrap: wrap;
+}
+
+.message,
+.primary,
+.muted {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.message {
+  background-color: var(--item_hover_global);
+  color: var(--color_global);
+}
+
+.primary {
+  background-color: var(--hashtag_color_global);
+  color: #fff;
+}
+
+.muted {
+  background-color: transparent;
+  border: var(--border_global);
+  color: var(--separator_color_global);
+}
+
+.primary:disabled,
+.muted:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

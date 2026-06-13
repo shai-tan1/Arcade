@@ -1,0 +1,35 @@
+.formatted_post_date_wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.separator svg {
+    display: flex;
+    width: 3.8px;
+    height: 3.8px;
+    margin: 0 7px;
+    border-radius: 50%;
+    fill: var(--separator_color_global);
+}
+
+@media (max-width: 1250px) {
+    .separator_full_post svg {
+        width: 3.2px;
+        height: 3.2px;
+    }
+}
+
+@media (max-width: 365px) {
+    .separator_post_preview svg {
+        width: 2.8px;
+        height: 2.8px;
+    }
+}
+
+@media (max-width: 325px) {
+    .separator_full_post svg {
+        width: 2px;
+        height: 2px;
+    }
+}

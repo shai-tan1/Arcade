@@ -1,0 +1,45 @@
+.right_side {
+  scrollbar-color: var(--scrollbar_color_global);
+  scrollbar-width: thin;
+  z-index: 2;
+  height: 100%;
+  position: fixed;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 3px;
+  min-width: 207px;
+  max-width: 207px;
+}
+
+.options_menu {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+  background-color: var(--options_menu_background-color);
+  backdrop-filter: saturate(180%) blur(2px);
+  -webkit-backdrop-filter: saturate(180%) blur(2px);
+  z-index: 3;
+  min-height: 40px;
+}
+
+@media (max-width: 1170px) {
+  .right_side {
+    min-width: 182px;
+    max-width: 182px;
+  }
+}
+
+/* variables */
+/* theme colors */
+[data-right-side-dark-theme="true"] {
+  --options_menu_background-color: #0000009e;
+}
+
+[data-right-side-dark-theme="false"] {
+  --options_menu_background-color: rgb(255, 255, 255);
+}
+
+/* /theme colors */
+/* /variables */

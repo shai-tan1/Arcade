@@ -1,0 +1,20 @@
+.formatted_registration_date_wrap {
+    display: flex;
+    align-items: center;
+}
+
+.separator svg {
+    display: flex;
+    border-radius: 50%;
+    width: 4.5px;
+    height: 4.5px;
+    margin: 0 7px;
+    fill: var(--color_global);
+}
+
+@media (max-width: 365px) {
+    .separator svg {
+        width: 2.8px;
+        height: 2.8px;
+    }
+}
