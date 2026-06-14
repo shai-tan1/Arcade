@@ -17,6 +17,9 @@ export const USER_SCHEMA = {
     creator: {
       bsonType: "bool",
     },
+    isModerator: {
+      bsonType: "bool",
+    },
     name: {
       bsonType: "string",
     },

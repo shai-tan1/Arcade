@@ -8,6 +8,8 @@ export const FORUM_TOPIC_SCHEMA = {
         title: { bsonType: 'string' },
         body: { bsonType: 'string' },
         tags: { bsonType: 'array', items: { bsonType: 'string' } },
+        visibility: { enum: ['public', 'private'] },
+        communityIds: { bsonType: 'array', items: { bsonType: 'objectId' } },
         commentCount: { bsonType: ['int', 'long'] },
         upvoters: { bsonType: 'array', items: { bsonType: 'objectId' } },
         downvoters: { bsonType: 'array', items: { bsonType: 'objectId' } },

@@ -5,7 +5,6 @@ import {
   CurrentTopics,
   SideMenuDesktop
 } from "../../widgets";
-import { CrystalIcon } from "../../shared/ui";
 
 import styles from "./LeftSide.module.css";
 
@@ -41,9 +40,9 @@ export function LeftSide() {
         >
 
           <div className={styles.crystal_icon}>
-            <CrystalIcon />
+            <img src="/arcade-logo.png" alt="Arcade" />
           </div>
-          <p>Crystal</p>
+          <p>Arcade</p>
         </div>
         <Link to="/"></Link>
       </div>

@@ -121,6 +121,7 @@ export default function App() {
               <Route path="/games/:gameType" element={<GamesPage />} />
               <Route path="/forums" element={<ForumsPage />} />
               <Route path="/forums/new" element={<ForumsPage />} />
+              <Route path="/forums/moderators" element={<ForumsPage />} />
               <Route path="/forums/:topicId" element={<ForumsPage />} />
               <Route path="/forums/:topicId/edit" element={<ForumsPage />} />
               {/* /games */}

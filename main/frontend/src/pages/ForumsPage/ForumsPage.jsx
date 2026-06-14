@@ -47,6 +47,15 @@ function Avatar({ user, size = 22 }) {
   return <span className={`${styles.avatar} ${styles.avatar_empty}`} style={style}><NoAvatarIcon /></span>;
 }
 
+function LockIcon() {
+  return (
+    <svg className={styles.lock} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
+
 function VoteBox({ score, myVote, onVote }) {
   return (
     <div className={styles.vote}>
@@ -61,6 +70,7 @@ function VoteBox({ score, myVote, onVote }) {
 function TopicList() {
   const { t } = useTranslation();
   const q = useQuery({ queryKey: ['forums', 'list'], queryFn: () => httpClient.get('/forums'), retry: false });
+  const meQ = useQuery({ queryKey: ['admin', 'me'], queryFn: () => httpClient.get('/admin/me'), retry: false });
 
   return (
     <div className={styles.wrap}>
@@ -69,7 +79,10 @@ function TopicList() {
           <h1 className={styles.h1}>{t('ForumsPage.Title')}</h1>
           <p className={styles.sub}>{t('ForumsPage.Subtitle')}</p>
         </div>
-        <Link to="/forums/new" className={styles.btn_primary}>{t('ForumsPage.NewTopic')}</Link>
+        <div className={styles.head_actions}>
+          {meQ.data?.isCreator && <Link to="/forums/moderators" className={styles.btn_muted}>{t('ForumsPage.Moderators')}</Link>}
+          <Link to="/forums/new" className={styles.btn_primary}>{t('ForumsPage.NewTopic')}</Link>
+        </div>
       </header>
 
       {q.isPending && <div className={styles.center}><div className={styles.loader}><Loader /></div></div>}
@@ -80,7 +93,10 @@ function TopicList() {
           <li key={tp._id} className={styles.topic}>
             <span className={`${styles.listscore} ${tp.score > 0 ? styles.vpos : tp.score < 0 ? styles.vneg : ''}`}>{tp.score}</span>
             <div className={styles.topic_main}>
-              <Link to={`/forums/${tp._id}`} className={styles.topic_title}>{tp.title}</Link>
+              <Link to={`/forums/${tp._id}`} className={styles.topic_title}>
+                {tp.visibility === 'private' && <LockIcon />}
+                {tp.title}
+              </Link>
               <p className={styles.topic_snip}>{tp.snippet}{tp.snippet && tp.snippet.length >= 220 ? '…' : ''}</p>
               <div className={styles.meta}>
                 <Avatar user={tp.author} size={22} />
@@ -109,22 +125,34 @@ function TopicEditor({ topicId }) {
     enabled: editing,
     retry: false
   });
+  const communitiesQ = useQuery({ queryKey: ['communities', 'mine'], queryFn: () => httpClient.get('/communities'), retry: false });
+  const myComms = (communitiesQ.data || []).filter((c) => c.isMember);
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState('');
+  const [visibility, setVisibility] = useState('public');
+  const [selected, setSelected] = useState([]);
 
   useEffect(() => {
     if (editing && existing.data) {
       setTitle(existing.data.title || '');
       setBody(existing.data.body || '');
       setTags((existing.data.tags || []).join(', '));
+      setVisibility(existing.data.visibility || 'public');
+      setSelected((existing.data.communities || []).map((c) => c._id));
     }
   }, [editing, existing.data]);
 
   const save = useMutation({
     mutationFn: () => {
-      const payload = { title, body, tags: tags.split(',').map((s) => s.trim()).filter(Boolean) };
+      const payload = {
+        title,
+        body,
+        tags: tags.split(',').map((s) => s.trim()).filter(Boolean),
+        visibility,
+        communityIds: visibility === 'private' ? selected : []
+      };
       return editing ? httpClient.patch(`/forums/topic/${topicId}`, payload) : httpClient.post('/forums', payload);
     },
     onSuccess: (data) => {
@@ -133,7 +161,7 @@ function TopicEditor({ topicId }) {
     }
   });
 
-  const canSave = title.trim() && body.trim() && !save.isPending;
+  const canSave = title.trim() && body.trim() && (visibility === 'public' || selected.length > 0) && !save.isPending;
 
   return (
     <div className={styles.wrap}>
@@ -152,6 +180,33 @@ function TopicEditor({ topicId }) {
         <label className={styles.label}>{t('ForumsPage.TagsField')}</label>
         <input className={styles.input} value={tags} onChange={(e) => setTags(e.target.value)} placeholder={t('ForumsPage.TagsPlaceholder')} />
 
+        <label className={styles.label}>{t('ForumsPage.Visibility')}</label>
+        <div className={styles.seg}>
+          <button type="button" className={`${styles.seg_btn} ${visibility === 'public' ? styles.seg_on : ''}`} onClick={() => setVisibility('public')}>{t('ForumsPage.Public')}</button>
+          <button type="button" className={`${styles.seg_btn} ${visibility === 'private' ? styles.seg_on : ''}`} onClick={() => setVisibility('private')}>{t('ForumsPage.Private')}</button>
+        </div>
+
+        {visibility === 'private' && (
+          <>
+            <label className={styles.label}>{t('ForumsPage.SelectCommunities')}</label>
+            {myComms.length === 0 ? (
+              <p className={styles.hint}>{t('ForumsPage.NoCommunities')}</p>
+            ) : (
+              <div className={styles.comm_list}>
+                {myComms.map((c) => {
+                  const on = selected.includes(c._id);
+                  return (
+                    <button type="button" key={c._id} className={`${styles.comm_chip} ${on ? styles.comm_chip_on : ''}`}
+                      onClick={() => setSelected(on ? selected.filter((x) => x !== c._id) : [...selected, c._id])}>
+                      {c.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+
         {save.isError && <p className={styles.error}>{save.error?.message || t('ForumsPage.SaveError')}</p>}
 
         <div className={styles.form_actions}>
@@ -166,12 +221,13 @@ function TopicEditor({ topicId }) {
 }
 
 /* ----------------------------- comment node ----------------------------- */
-function CommentNode({ node, myId, t, ctx }) {
+function CommentNode({ node, myId, canModerate, t, ctx }) {
   const [replyText, setReplyText] = useState('');
   const [editText, setEditText] = useState(node.body);
   const isReplying = ctx.replyTo === node._id;
   const isEditing = ctx.editing === node._id;
   const mine = !node.deleted && node.author?._id === myId;
+  const canDelete = !node.deleted && (mine || canModerate);
 
   return (
     <div className={styles.cnode}>
@@ -206,7 +262,7 @@ function CommentNode({ node, myId, t, ctx }) {
                 <div className={styles.comment_actions}>
                   <button className={styles.link_action} onClick={() => { ctx.setReplyTo(isReplying ? null : node._id); setReplyText(''); }}>{t('ForumsPage.Reply')}</button>
                   {mine && <button className={styles.link_action} onClick={() => { ctx.setEditing(node._id); setEditText(node.body); }}>{t('ForumsPage.Edit')}</button>}
-                  {mine && <button className={styles.link_action} onClick={() => { if (window.confirm(t('ForumsPage.ConfirmDeleteComment'))) ctx.onDelete(node._id); }}>{t('ForumsPage.Delete')}</button>}
+                  {canDelete && <button className={styles.link_action} onClick={() => { if (window.confirm(t('ForumsPage.ConfirmDeleteComment'))) ctx.onDelete(node._id); }}>{t('ForumsPage.Delete')}</button>}
                 </div>
               )}
             </>
@@ -227,7 +283,7 @@ function CommentNode({ node, myId, t, ctx }) {
       {node.children?.length > 0 && (
         <div className={styles.children}>
           {node.children.map((child) => (
-            <CommentNode key={child._id} node={child} myId={myId} t={t} ctx={ctx} />
+            <CommentNode key={child._id} node={child} myId={myId} canModerate={canModerate} t={t} ctx={ctx} />
           ))}
         </div>
       )}
@@ -288,6 +344,13 @@ function TopicView({ topicId }) {
       <article className={styles.post}>
         <VoteBox score={topic.score} myVote={topic.myVote} onVote={(d) => voteTopic.mutate(d)} />
         <div className={styles.post_main}>
+          {topic.visibility === 'private' && (
+            <div className={styles.priv_badge}>
+              <LockIcon />
+              <span>{t('ForumsPage.Private')}</span>
+              {topic.communities?.length > 0 && <span className={styles.priv_comms}>· {topic.communities.map((c) => c.name).join(', ')}</span>}
+            </div>
+          )}
           <h2 className={styles.post_title}>{topic.title}</h2>
           <div className={styles.meta}>
             <Avatar user={topic.author} size={24} />
@@ -297,9 +360,9 @@ function TopicView({ topicId }) {
           </div>
           {topic.tags?.length > 0 && <div className={styles.tags}>{topic.tags.map((tag) => <span key={tag} className={styles.tag}>{tag}</span>)}</div>}
           <div className={styles.post_body}>{topic.body}</div>
-          {topic.isOwner && (
+          {(topic.isOwner || topic.canModerate) && (
             <div className={styles.owner_actions}>
-              <Link to={`/forums/${topicId}/edit`} className={styles.link_action}>{t('ForumsPage.Edit')}</Link>
+              {topic.isOwner && <Link to={`/forums/${topicId}/edit`} className={styles.link_action}>{t('ForumsPage.Edit')}</Link>}
               <button className={styles.link_action} onClick={() => { if (window.confirm(t('ForumsPage.ConfirmDeleteTopic'))) delTopic.mutate(); }}>{t('ForumsPage.Delete')}</button>
             </div>
           )}
@@ -318,9 +381,66 @@ function TopicView({ topicId }) {
 
         {commentsQ.isPending && <div className={styles.center}><div className={styles.loader}><Loader /></div></div>}
         <div className={styles.tree}>
-          {tree.map((node) => <CommentNode key={node._id} node={node} myId={myId} t={t} ctx={ctx} />)}
+          {tree.map((node) => <CommentNode key={node._id} node={node} myId={myId} canModerate={!!topic.canModerate} t={t} ctx={ctx} />)}
         </div>
       </section>
+    </div>
+  );
+}
+
+/* ----------------------------- moderators (creator only) ----------------------------- */
+function ModeratorsPanel() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const meQ = useQuery({ queryKey: ['admin', 'me'], queryFn: () => httpClient.get('/admin/me'), retry: false });
+  const isCreator = meQ.data?.isCreator;
+  const modsQ = useQuery({ queryKey: ['admin', 'moderators'], queryFn: () => httpClient.get('/admin/moderators'), enabled: !!isCreator, retry: false });
+  const [cid, setCid] = useState('');
+
+  const add = useMutation({
+    mutationFn: () => httpClient.post('/admin/moderators', { customId: cid.replace(/^@/, '').trim() }),
+    onSuccess: () => { setCid(''); qc.invalidateQueries({ queryKey: ['admin', 'moderators'] }); }
+  });
+  const remove = useMutation({
+    mutationFn: (uid) => httpClient.delete(`/admin/moderators/${uid}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'moderators'] })
+  });
+
+  if (meQ.isPending) return <div className={styles.center}><div className={styles.loader}><Loader /></div></div>;
+
+  return (
+    <div className={styles.wrap}>
+      <header className={styles.head_simple}>
+        <Link to="/forums" className={styles.back}>←</Link>
+        <h1 className={styles.h1}>{t('ForumsPage.Moderators')}</h1>
+      </header>
+
+      {!isCreator ? (
+        <p className={styles.empty}>{t('ForumsPage.NotAllowed')}</p>
+      ) : (
+        <>
+          <p className={styles.sub}>{t('ForumsPage.ModeratorsHint')}</p>
+          <div className={styles.mod_add}>
+            <input className={styles.input} value={cid} onChange={(e) => setCid(e.target.value)} placeholder={t('ForumsPage.ModeratorCustomId')} />
+            <button className={styles.btn_primary} disabled={!cid.trim() || add.isPending} onClick={() => add.mutate()}>{t('ForumsPage.AddModerator')}</button>
+          </div>
+          {add.isError && <p className={styles.error}>{add.error?.message || t('ForumsPage.SaveError')}</p>}
+
+          {modsQ.data?.length === 0 && <p className={styles.empty}>{t('ForumsPage.NoModerators')}</p>}
+          <ul className={styles.mods}>
+            {modsQ.data?.map((m) => (
+              <li key={m._id} className={styles.mod_row}>
+                <Avatar user={m} size={34} />
+                <div className={styles.mod_id}>
+                  <Link to={`/${m.customId}`} className={styles.meta_name}>{m.name}</Link>
+                  <span className={styles.mod_handle}>@{m.customId}</span>
+                </div>
+                <button className={styles.link_action} onClick={() => { if (window.confirm(t('ForumsPage.ConfirmRemoveMod'))) remove.mutate(m._id); }}>{t('ForumsPage.RemoveModerator')}</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }
@@ -329,6 +449,7 @@ function TopicView({ topicId }) {
 export function ForumsPage() {
   const { topicId } = useParams();
   const loc = useLocation();
+  if (loc.pathname === '/forums/moderators') return <ModeratorsPanel />;
   if (loc.pathname === '/forums/new') return <TopicEditor />;
   if (topicId && loc.pathname.endsWith('/edit')) return <TopicEditor topicId={topicId} />;
   if (topicId) return <TopicView topicId={topicId} />;

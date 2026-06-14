@@ -366,6 +366,19 @@
     "ConfirmDeleteTopic": "Delete this topic and all its comments?",
     "ConfirmDeleteComment": "Delete this comment?",
     "TopicError": "This topic could not be loaded.",
-    "SaveError": "Something went wrong. Please try again."
+    "SaveError": "Something went wrong. Please try again.",
+    "Visibility": "Visibility",
+    "Public": "Public",
+    "Private": "Private",
+    "SelectCommunities": "Visible to communities",
+    "NoCommunities": "You're not in any communities yet. Join one to post a private blog.",
+    "Moderators": "Moderators",
+    "ModeratorsHint": "Add a member as a moderator by their username. Moderators can delete any blog or comment and can see all private blogs.",
+    "ModeratorCustomId": "Member username (e.g. johndoe)",
+    "AddModerator": "Add",
+    "NoModerators": "No moderators yet.",
+    "RemoveModerator": "Remove",
+    "ConfirmRemoveMod": "Remove this moderator?",
+    "NotAllowed": "Only the creator can manage moderators."
   }
 }

@@ -149,3 +149,22 @@
 }
 
 /* /variables */
+
+/* arcade logo image (replaces crystal svg) */
+.crystal_icon img {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+.logo_user_not_authorized .crystal_icon img {
+  width: 27px;
+  height: 27px;
+}
+@media (max-width: 1170px) {
+  .crystal_icon img {
+    width: 35px;
+    height: 35px;
+  }
+}

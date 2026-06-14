@@ -43,7 +43,7 @@ export function HeaderMobile() {
 
         <Link className={styles.logo} to="/">
           <CrystalIcon />
-          {(!logInStatus && showLogo) && <p>Crystal</p>}
+          {(!logInStatus && showLogo) && <p>Arcade</p>}
         </Link>
 
         <OptionsMenu />

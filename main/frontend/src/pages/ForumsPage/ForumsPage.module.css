@@ -88,3 +88,34 @@
 .avatar { border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; }
 .avatar_empty { display: inline-flex; align-items: center; justify-content: center; background-color: var(--item_hover_global); }
 .avatar_empty svg { width: 60%; height: 60%; fill: var(--fill_no_avatar_global); }
+
+/* ===== moderators + visibility additions ===== */
+.head_actions { display: flex; align-items: center; gap: 10px; }
+
+.lock { width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; color: var(--separator_color_global); display: inline-block; }
+.topic_title .lock { color: var(--hashtag_color_global); }
+
+/* visibility segmented control */
+.seg { display: inline-flex; background-color: var(--filling_background-color_global); border: var(--border_global); border-radius: 11px; padding: 3px; gap: 3px; width: fit-content; }
+.seg_btn { padding: 8px 18px; border: none; background: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--separator_color_global); }
+.seg_on { background-color: var(--hashtag_color_global); color: var(--on_accent_global); }
+
+.hint { font-size: 13px; color: var(--separator_color_global); padding: 4px 0; }
+
+/* community multi-select */
+.comm_list { display: flex; flex-wrap: wrap; gap: 8px; }
+.comm_chip { padding: 8px 14px; border-radius: 10px; border: var(--border_global); background-color: var(--filling_background-color_global); color: var(--color_global); cursor: pointer; font-size: 13px; font-weight: 600; }
+.comm_chip_on { background-color: color-mix(in srgb, var(--hashtag_color_global) 16%, transparent); border-color: var(--hashtag_color_global); color: var(--hashtag_color_global); }
+
+/* private badge */
+.priv_badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--hashtag_color_global); background-color: color-mix(in srgb, var(--hashtag_color_global) 12%, transparent); border-radius: 8px; padding: 5px 10px; margin-bottom: 12px; }
+.priv_badge .lock { color: var(--hashtag_color_global); margin: 0; }
+.priv_comms { color: var(--separator_color_global); font-weight: 600; text-transform: none; letter-spacing: 0; }
+
+/* moderators panel */
+.mod_add { display: flex; gap: 10px; margin: 14px 0; }
+.mod_add .input { flex: 1; }
+.mods { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.mod_row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: var(--filling_background-color_global); border: var(--border_global); }
+.mod_id { flex: 1; display: flex; flex-direction: column; }
+.mod_handle { font-size: 13px; color: var(--separator_color_global); }
